@@ -1,3 +1,6 @@
+/* colors.c
+ * helper functions for coloring based on LS_COLORS */
+
 #include <string.h>
 #include <ncurses.h>
 #include <stdlib.h>

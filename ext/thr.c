@@ -1,3 +1,6 @@
+/* thr.c
+ * functions for starting/stopping the loading threads */
+
 #include <pthread.h>
 #include <signal.h>
 #include <stdbool.h>

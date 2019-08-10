@@ -1,3 +1,6 @@
+/* sort.c
+ * sort functions for qsort used for sorting the files */
+
 #include <ctype.h>
 #include <string.h>
 #include "sort.h"

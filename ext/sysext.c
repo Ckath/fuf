@@ -1,3 +1,8 @@
+/* sysext.c
+ * extended system functions
+ * ext_kill: kills process and all child processes
+ * ext_popen: popen clone that returns pid of process */
+
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
