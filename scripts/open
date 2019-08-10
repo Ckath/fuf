@@ -1,0 +1,15 @@
+#!/bin/bash
+# minimal open script
+# for use with fuf instead of xdg-open
+
+case $(file --mime-type -b "$1") in
+	video/* | audio/*)
+		mpv --no-terminal --force-window "$1"
+		;;
+	image/*)
+		mpv --loop-file=inf --no-terminal "$1"
+		;;
+	text/* | */json)
+		$EDITOR "$1"
+		;;
+esac

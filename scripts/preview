@@ -1,0 +1,130 @@
+# this preview script is originally based off of rangers scope.sh
+# unlike ranger, fuf expects the preview script to handle everything
+# from generating text previews to rendering the images within the terminal
+
+# Meaningful aliases for arguments:
+path="$1"              # Full path of the selected file
+width="$2"             # Width of the preview pane (number of fitting characters)
+height="$3"            # Height of the preview pane (number of fitting characters)
+cached="$(echo ~)/.thumbnails/$path" # Path that should be used to cache image previews
+
+# preview img position/size config, this changes for each font and terminal
+# you will have to tweak this
+offset_w=27
+offset_h=10
+max_w=$((width*7-5))
+max_h=$((height*13))
+
+# Find out something about the file:
+mimetype=$(file --mime-type -Lb "$path")
+extension=$(/bin/echo "${path##*.}" | awk '{print tolower($0)}')
+
+# Functions:
+# runs a command and saves its output into $output.  Useful if you need
+# the return value AND want to use the output in a pipe
+try() { output=$(eval '"$@"'); }
+
+# writes the output of the previously used "try" command
+dump() { /bin/echo "$output"; }
+
+# a common post-processing function used after most commands
+trim() { head -n $height | cut -c -$width; }
+
+# wraps highlight to treat exit code 141 (killed by SIGPIPE) as success
+safepipe() { "$@"; test $? = 0 -o $? = 141; }
+
+# clears preview img area
+clearimg() {
+	echo -e "6;$((max_w+offset_w));$offset_h;$((max_w+2));$((max_h+2))\n3;" | /usr/lib/w3m/w3mimgdisplay
+}
+
+# displays images at guestimated coordinates
+displayimg() {
+	read img_width img_height <<< $(echo "5;$1" | /usr/lib/w3m/w3mimgdisplay)
+
+	if [ "$img_width" -gt "$max_w" ]; then
+		img_height=$((img_height * max_w/img_width))
+		img_width=$max_w
+	fi
+	if [ "$img_height" -gt "$max_h" ]; then
+		img_width=$((img_width * max_h/img_height))
+		img_height=$max_h
+	fi
+	echo -e "0;1;$((max_w+offset_w));$offset_h;$img_width;$img_height;;;;;$1\n4;\n3;" | /usr/lib/w3m/w3mimgdisplay
+}
+
+clearimg # clear any img
+
+# Image previews
+case "$mimetype" in
+	# Image previews for SVG files, disabled by default.
+	image/svg+xml)
+	   convert "$path" "$cached" && displayimg "$cached"
+	   exit;;
+	# Image previews for PDF files
+	application/pdf)
+	   pdftoppm -jpeg -singlefile "$path" "${cached//.jpg}" && displayimg "$cached".jpg
+	   exit;;
+	# Image previews for image files. w3mimgdisplay will be called for all
+	# image files (unless overriden as above), but might fail for
+	# unsupported types.
+	image/*)
+		displayimg "$path"
+		exit;;
+	# Image preview for video, disabled by default.:
+	video/*)
+		ffmpegthumbnailer -i "$path" -o "$cached" -s 0 && displayimg "$cached"
+		exit;;
+esac
+
+case "$extension" in
+    # Archive extensions:
+    a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
+    rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
+        try unzip -l "$path" && { dump | trim; exit 0; }
+        try als "$path" && { dump | trim; exit 0; }
+        try acat "$path" && { dump | trim; exit 3; }
+        try bsdtar -lf "$path" && { dump | trim; exit 0; }
+        exit 1;;
+    rar)
+        # avoid password prompt by providing empty password
+        try unrar -p- l "$path" && { dump | trim; exit 0; } || exit 1;;
+    7z)
+        # avoid password prompt by providing empty password
+        try 7z -p l "$path" && { dump | trim; exit 0; } || exit 1;;
+    # PDF documents:
+    pdf)
+        try pdftotext -l 10 -nopgbrk -q "$path" - && \
+            { dump | trim | fmt -s -w $width; exit 0; } || exit 1;;
+    # BitTorrent Files
+    torrent)
+        try transmission-show "$path" && { dump | trim; exit 5; } || exit 1;;
+    # ODT Files
+    odt|ods|odp|sxw)
+        try odt2txt "$path" && { dump | trim; exit 5; } || exit 1;;
+    # HTML Pages:
+    htm|html|xhtml)
+        try w3m    -dump "$path" && { dump | trim | fmt -s -w $width; exit 4; }
+        try lynx   -dump "$path" && { dump | trim | fmt -s -w $width; exit 4; }
+        try elinks -dump "$path" && { dump | trim | fmt -s -w $width; exit 4; }
+        ;; # fall back to highlight/cat if the text browsers fail
+esac
+
+case "$mimetype" in
+    # Syntax highlight for text files:
+    text/* | */xml)
+        try safepipe cat "$path" && { dump | trim; exit 5; }
+        exit 2;;
+    # Ascii-previews of images:
+    image/*)
+        img2txt --gamma=0.6 --width="$width" "$path" && exit 4 || exit 1;;
+    # Display information about media files:
+    video/* | audio/*)
+        exiftool "$path" && exit 5
+        # Use sed to remove spaces so the output fits into the narrow window
+        try mediainfo "$path" && { dump | trim | sed 's/  \+:/: /;';  exit 5; } || exit 1;;
+	inode/directory)
+	tree "$path" | trim ; exit;
+esac
+
+exit 1
