@@ -440,6 +440,9 @@ main(int argc, char *argv[])
 				strcpy(goto_item, items[sel_item].name);
 				start_load(load_items, display_load);
 				break;
+			case 'R':
+				handle_redraw();
+				break;
 			case 'g':
 				if (ch_prompt("goto: [g] top") == 'g') {
 					sel_item = 0;

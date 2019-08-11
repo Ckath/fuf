@@ -15,7 +15,8 @@ another cli filebrowser made just for myself with the following ideas:
 `j`,`k`,`l`,`h`,`H`,`M`,`L`,`G`,`gg`,`/`,`n`,`N`,`q`,`^u`,`^d`,`^f`,`^b`,`^y`,`^e`,`zz`,`zb`,`zt`
 ### non vim
 `s`: sort (+`a`/`A` alphabetical, +`s`/`S` size based, +`t`/`T` time based)\
-`r`: reload
+`r`: reload\
+`R`: force redraw of ui
 
 ## setup
 ### install [WIP]
