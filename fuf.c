@@ -390,11 +390,58 @@ refresh_layout()
 	start_preview(load_preview);
 }
 
+static void
+usage()
+{
+	fputs("usage: fuf [-aAsStTvh] [PATH]\n"
+			"-a\tsort alphabetical, this is default\n"
+			"-A\tsort alphabetical, reversed\n"
+			"-s\tsort by size\n"
+			"-S\tsort by size, reversed\n"
+			"-t\tsort by time\n"
+			"-T\tsort by time, resersed\n"
+			"-v\tversion info\n"
+			"-h\tusage info\n", stderr);
+	exit(1);
+}
+
 int
 main(int argc, char *argv[])
 {
 	if (argc > 1) {
 		chdir(argv[1]);
+	}
+
+	/* handle options */
+	char c;
+	if ((c = getopt(argc, argv, "aAsStTvh")) != -1) {
+		switch (c) {
+			case 'a':
+				sort = alpha_cmp;
+				break;
+			case 'A':
+				sort = Alpha_cmp;
+				break;
+			case 's':
+				sort = size_cmp;
+				break;
+			case 'S':
+				sort = Size_cmp;
+				break;
+			case 't':
+				sort = time_cmp;
+				break;
+			case 'T':
+				sort = Time_cmp;
+				break;
+			case 'v':
+				puts("todo");
+				exit(0);
+				break;
+			case 'h':
+			default:
+				usage();
+		}
 	}
 
 	setlocale(LC_ALL, "");
