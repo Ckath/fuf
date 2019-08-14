@@ -169,7 +169,9 @@ open_file()
 		}
 		sprintf(open_path, "%s/.config/fuf/open", home);
 
-		execlp(open_path, "open", file, NULL);
+		struct stat sb;
+		execlp(stat(open_path, &sb) == 0 ? open_path : "/etc/fuf/open",
+				"open", file, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
 		char proc_path[256];
@@ -272,12 +274,16 @@ load_preview()
 	char file[256];
 	strcpy(file, items[sel_item].name);
 	const char *home;
+	char preview_path[PATH_MAX];
 	char preview_cmd[PATH_MAX];
+	struct stat sb;
 	if (!(home = getenv("HOME"))) {
 		home = getpwuid(getuid())->pw_dir;
 	}
-	sprintf(preview_cmd, "%s/.config/fuf/preview \"%s\" %d %d 2>&1",
- 			home, file, COLS/2-2, LINES-2);
+	sprintf(preview_path, "%s/.config/fuf/preview", home);
+	sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
+ 			stat(preview_path, &sb) == 0 ?  preview_path : "/etc/fuf/preview",
+			file, COLS/2-2, LINES-2);
 
 	int fd;
 	FILE *fp = NULL;

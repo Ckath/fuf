@@ -19,14 +19,14 @@ another cli filebrowser made just for myself with the following ideas:
 `R`: force redraw of ui
 
 ## setup
-### install [WIP]
-`make strap` - compile sources and link files to location\
+### install
+`sudo make install`\
 \* ncurses, pthreads and a posix system is required to compile fuf
 ### uninstall
-`sudo rm -rf /usr/bin/fuf ~/.config/fuf`
+`sudo make uninstall`
 ### configuration
-quite a few utilities are used in the preview script to generate previews, w3m is used for displaying the images.
-since fuf relies 100% on the scripts for handling opening and previewing files you can use whatever you see fit to achieve this
+`mkdir ~/.config/fuf && cp /etc/fuf/* ~/.config/fuf`\
+grab the default scripts and move them to local copies, you can also choose symlink xdg-open or other open managers to ~/.config/fuf/open at this point. the fuf preview and open executables/scripts fully handle opening and previewing files, this means you can customize the way this is handled completely within these scripts.
 
 ## non issues/wontfix
 - previews showing 'command not found'\

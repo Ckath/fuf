@@ -3,6 +3,7 @@ CFLAGS =
 LIBS = -lncurses -lpthread
 SRC = ${NAME}.c ext/colors.c ext/sort.c ext/thr.c ext/sysext.c
 OBJ = ${SRC:.c=.o}
+DESTDIR = /usr
 CC = gcc
 
 .c.o: 
@@ -17,9 +18,16 @@ clean:
 	@echo cleaning...
 	@rm -f ${NAME} ${OBJ}
 
-strap: ${NAME}
-	@echo setting up ${NAME} 
-	@mkdir -p ~/.config/fuf
-	@sudo ln -svf "$(CURDIR)/fuf" /bin
-	@ln -svf "$(CURDIR)/scripts/open" ~/.config/fuf
-	@ln -svf "$(CURDIR)/scripts/preview" ~/.config/fuf
+install: ${NAME}
+	@echo installing executable file to ${DESTDIR}/bin
+	@mkdir -p ${DESTDIR}/bin
+	@cp -f ${NAME} ${DESTDIR}/bin/${NAME}
+	@chmod 755 ${DESTDIR}/bin/${NAME}
+	@echo installing scripts
+	@mkdir -p /etc/${NAME}
+	@cp -f scripts/* /etc/${NAME}
+uninstall: ${NAME}
+	@echo removing executable file from ${DESTDIR}/bin
+	@rm -f ${DESTDIR}/bin/${NAME}
+	@echo removing scripts
+	@rm -rf /etc/${NAME}
