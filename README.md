@@ -18,6 +18,9 @@ another cli filebrowser made just for myself with the following ideas:
 `r`: reload\
 `R`: force redraw of ui
 
+## development
+current bugs, features and enhancements in the works are kept track of in [issues](https://github.com/Ckath/fuf/issues), refer to this to see what's happening at the moment. PRs are always welcome, but make an issue first to discuss any new features or bugs.
+
 ## setup
 ### install
 `sudo make install`\
@@ -41,9 +44,8 @@ set your `LS_COLORS`, ls defaults back to an unfindable default, fuf only reads 
 this will never be added, it annoys me
 - problems with programs using terminal as ui\
 these are whitelisted in fuf in the `CLI_PROGRAMS` definition in fuf.c, make a pr or issue for one to be added
-
-## development
-current bugs, features and enhancements in the works are kept track of in [issues](https://github.com/Ckath/fuf/issues), refer to this to see what's happening at the moment. PRs are always welcome, but make an issue first to discuss any new features or bugs.
+- issues related to scripts remain after update that should fix them\
+since fuf allows you use your own versions of the scripts in ~/.config/fuf its up to yourself to keep up with patching these with the latest changes from the /usr/lib/fuf supplied ones.
 
 ## inspirations
 - [ranger](https://github.com/ranger/ranger): the cli fm that annoyed me to the point of writing my own
