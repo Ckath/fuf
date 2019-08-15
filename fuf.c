@@ -170,7 +170,7 @@ open_file()
 		sprintf(open_path, "%s/.config/fuf/open", home);
 
 		struct stat sb;
-		execlp(stat(open_path, &sb) == 0 ? open_path : "/etc/fuf/open",
+		execlp(stat(open_path, &sb) == 0 ? open_path : "/usr/lib/fuf/open",
 				"open", file, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
@@ -282,7 +282,7 @@ load_preview()
 	}
 	sprintf(preview_path, "%s/.config/fuf/preview", home);
 	sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
- 			stat(preview_path, &sb) == 0 ?  preview_path : "/etc/fuf/preview",
+ 			stat(preview_path, &sb) == 0 ?  preview_path : "/usr/lib/fuf/preview",
 			file, COLS/2-2, LINES-2);
 
 	int fd;

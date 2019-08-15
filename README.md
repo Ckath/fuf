@@ -25,7 +25,7 @@ another cli filebrowser made just for myself with the following ideas:
 ### uninstall
 `sudo make uninstall`
 ### configuration
-`mkdir ~/.config/fuf && cp /etc/fuf/* ~/.config/fuf`\
+`mkdir ~/.config/fuf && cp /usr/lib/fuf/* ~/.config/fuf`\
 grab the default scripts and move them to local copies, you can also choose symlink xdg-open or other open managers to ~/.config/fuf/open at this point. the fuf preview and open executables/scripts fully handle opening and previewing files, this means you can customize the way this is handled completely within these scripts.
 
 ## non issues/wontfix
