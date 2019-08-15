@@ -23,6 +23,7 @@
 #define CLI_PROGRAMS "vi nvim nano dhex"
 
 static void handle_redraw();  /* utility */
+static void init();
 static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
 static void search_next(bool reverse);
@@ -40,6 +41,8 @@ unsigned sel_item = 0;
 void *sort = alpha_cmp;
 char search[256];
 char goto_item[256];
+char open_path[PATH_MAX];
+char preview_path[PATH_MAX];
 
 static void
 handle_redraw()
@@ -53,6 +56,36 @@ handle_redraw()
 		? 0 : scroll_pos;
 
 	refresh_layout();
+}
+
+static void
+init()
+{
+	/* check location of scripts */
+	setlocale(LC_ALL, "");
+	char user_config[PATH_MAX];
+	struct stat sb;
+	const char *home;
+	if (!(home = getenv("HOME"))) {
+		home = getpwuid(getuid())->pw_dir;
+	}
+	sprintf(user_config, "%s/.config/fuf/open", home);
+	sprintf(open_path, stat(user_config, &sb) == 0 ? user_config : "/usr/lib/fuf/open");
+	sprintf(user_config, "%s/.config/fuf/preview", home);
+	sprintf(preview_path, stat(user_config, &sb) == 0 ? user_config : "/usr/lib/fuf/preview");
+
+	/* init ncurses */
+	initscr();
+	cbreak();
+	noecho();
+	curs_set(0);
+	init_colors();
+
+	/* init fuf */
+	handle_redraw();
+	start_load(load_items, display_load);
+	signal(SIGWINCH, handle_redraw);
+	signal(SIGCHLD, SIG_IGN);
 }
 
 static char
@@ -162,16 +195,7 @@ open_file()
 		char file[256];
 		strcpy(file, items[sel_item].name);
 		free(items);
-		const char *home;
-		char open_path[PATH_MAX];
-		if (!(home = getenv("HOME"))) {
-			home = getpwuid(getuid())->pw_dir;
-		}
-		sprintf(open_path, "%s/.config/fuf/open", home);
-
-		struct stat sb;
-		execlp(stat(open_path, &sb) == 0 ? open_path : "/usr/lib/fuf/open",
-				"open", file, NULL);
+		execlp(open_path, "open", file, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
 		char proc_path[256];
@@ -273,17 +297,9 @@ load_preview()
 
 	char file[256];
 	strcpy(file, items[sel_item].name);
-	const char *home;
-	char preview_path[PATH_MAX];
 	char preview_cmd[PATH_MAX];
-	struct stat sb;
-	if (!(home = getenv("HOME"))) {
-		home = getpwuid(getuid())->pw_dir;
-	}
-	sprintf(preview_path, "%s/.config/fuf/preview", home);
 	sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
- 			stat(preview_path, &sb) == 0 ?  preview_path : "/usr/lib/fuf/preview",
-			file, COLS/2-2, LINES-2);
+ 			preview_path, file, COLS/2-2, LINES-2);
 
 	int fd;
 	FILE *fp = NULL;
@@ -403,16 +419,7 @@ main(int argc, char *argv[])
 		chdir(argv[1]);
 	}
 
-	setlocale(LC_ALL, "");
-	initscr();
-	cbreak();
-	noecho();
-	curs_set(0);
-	init_colors();
-	handle_redraw();
-	start_load(load_items, display_load);
-	signal(SIGWINCH, handle_redraw);
-	signal(SIGCHLD, SIG_IGN);
+	init();
 
 	/* main key handling loop */
 	char cwd[PATH_MAX];
