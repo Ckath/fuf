@@ -20,7 +20,7 @@
 #include "item.h"
 
 #define CTRL(c) (c&0x1f)
-#define CLI_PROGRAMS "vi nvim nano dhex"
+#define CLI_PROGRAMS "vi nvim nano dhex man w3m elinks links2 links lynx"
 
 static void handle_redraw();  /* utility */
 static void init();
