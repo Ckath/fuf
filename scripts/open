@@ -1,15 +1,141 @@
 #!/bin/bash
-# minimal open script
-# for use with fuf instead of xdg-open
+# rewritten scope from ranger, in pure shellscript
+# replace with anything you want in ~/.config/fuf/open, can even be xdg-open
+# keep in mind fuf does not handle output or errors programs give,
+# unless its a known CLI_PROGRAM fuf should wait for completely
 
-case $(file --mime-type -b "$1") in
-	video/* | audio/*)
-		mpv --no-terminal --force-window "$1"
+# fileinfo
+mimetype=$(file --mime-type -Lb "$1")
+extension=$(/bin/echo "${1##*.}" | awk '{print tolower($0)}')
+# functions
+has() { type $1 &> /dev/null; }   # check if program is available
+silence() { "$1" "$2" &> /dev/null; } # run without terminal output, for gui programs
+
+
+#-------------------------------------------
+# Websites
+#-------------------------------------------
+# Rarely installed browsers get higher priority; It is assumed that if you
+# install a rare browser, you probably use it.  Firefox/konqueror/w3m on the
+# other hand are often only installed as fallback browsers.
+if [[ "$extension" == ?html? ]]; then
+	has firefox          && silence firefox "$1" && exit
+	has seamonkey        && silence seamonkey "$1" && exit
+	has iceweasel        && silence iceweasel "$1" && exit
+	has icecat           && silence icecat "$1" && exit
+	has vimprobable      && silence vimprobable "$1" && exit
+	has vimprobable2     && silence vimprobable2 "$1" && exit
+	has qutebrowser      && silence qutebrowser "$1" && exit
+	has opera            && silence opera "$1" && exit
+	has epiphany         && silence epiphany "$1" && exit
+	has konqueror        && silence konqueror "$1" && exit
+	has surf             && silence surf file://"$1" && exit
+	has dwb              && silence dwb "$1" && exit
+	has jumanji          && silence jumanji "$1" && exit
+	has luakit           && silence luakit "$1" && exit
+	has uzbl             && silence uzbl "$1" && exit
+	has uzbl-tabbed      && silence uzbl-tabbed "$1" && exit
+	has uzbl-browser     && silence uzbl-browser "$1" && exit
+	has uzbl-core        && silence uzbl-core "$1" && exit
+	has midori           && silence midori "$1" && exit
+	has elinks           && elinks "$1" && exit
+	has links2           && links2 "$1" && exit
+	has links            && links "$1" && exit
+	has lynx             && lynx "$1" && exit
+	has w3m              && w3m "$1" && exit
+	has chromium-browser && silence chromium-browser "$1" && exit
+	has chromium         && silence chromium "$1" && exit
+	has google-chrome    && silence google-chrome "$1" && exit
+fi
+
+#-------------------------------------------
+# Misc
+#-------------------------------------------
+# Define the "editor" for text files as first action
+[[ $mimetype == text/* ]] && (${VISUAL:-$EDITOR} "$1" && exit)
+case $extension in
+	xml|json|csv|tex|py|pl|rb|js|sh|php)
+		${VISUAL:-$EDITOR} "$1" && exit;;
+esac
+
+#--------------------------------------------
+# Video/Audio
+#-------------------------------------------
+case $mimetype in
+	audio/*)
+		has mpv      && silence mpv --force-window "$1" && exit
+		has gmplayer && silence gmplayer "$1" && exit
+		has smplayer && silence smplayer "$1" && exit
+		has vlc      && silence vlc "$1" && exit
+		has totem    && silence totem "$1" && exit
 		;;
-	image/*)
-		mpv --loop-file=inf --no-terminal "$1"
-		;;
-	text/* | */json)
-		$EDITOR "$1"
+	video/*)
+		has mpv      && silence mpv "$1" && exit
+		has mplayer2 && silence mplayer2 "$1" && exit
+		has mplayer  && silence mplayer "$1" && exit
 		;;
 esac
+
+#-------------------------------------------
+# Documents
+#-------------------------------------------
+case $extension in
+	pdf)
+		has zathura   && silence zathura "$1" && exit
+		has llpp      && silence llpp "$1" && exit
+		has mupdf     && silence mupdf "$1" && exit
+		has mupdf-x11 && silence mupdf-x11 "$1" && exit
+		has apvlv     && silence apvlv "$1" && exit
+		has xpdf      && silence xpdf "$1" && exit
+		has evince    && silence evince "$1" && exit
+		has atril     && silence atril "$1" && exit
+		has okular    && silence okular "$1" && exit
+		has epdfview  && silence epdfview "$1" && exit
+		has qpdfview  && silence qpdfview "$1" && exit
+		has firefox	  && silence firefox "$1" && exit
+		;;
+	sxc|xlsx?|xlt|xlw|gnm|gnumeric)
+		has gnumeric && silent gnumeric "$1" && exit
+		has kspread  && silent kspread "$1" && exit
+		;;
+	pptx?|od[dfgpst]|docx?|sxc|xlsx?|xlt|xlw|gnm|gnumeric)
+		has libreoffice && silent libreoffice "$1" && exit
+		has soffice     && silent soffice "$1" && exit
+		has ooffice     && silent ooffice "$1" && exit
+		;;
+	djvu)
+		has zathura && silence zathura "$1" && exit
+		has evince  && silence evince "$1" && exit
+		has atril   && silence atril "$1" && exit
+		has djview  && silence djview "$1" && exit
+		;;
+	epub|mobi)
+		has ebook-viewer && silence ebook-viewer "$1"
+		;;
+esac
+
+#-------------------------------------------
+# Image Viewing:
+#-------------------------------------------
+case $mimetype in
+	image/svg*)
+		has display  && silence display "$1" && exit
+		has inkscape && silence inkscape "$1" && exit
+		;;
+	image/*)
+		has pqiv      && silence pqiv "$1" && exit
+		has sxiv      && silence sxiv "$1" && exit
+		has feh       && silence feh "$1" && exit
+		has mirage    && silence mirage "$1" && exit
+		has ristretto && silence ristretto "$1" && exit
+		has eog       && silence eog "$1" && exit
+		has eom       && silence eom "$1" && exit
+		has nomacs    && silence nomacs "$1" && exit
+		has geeqie    && silence geeqie "$1" && exit
+		has gwenview  && silence gwenview "$1" && exit
+		has mpv       && silence mpv --loop-file=inf "$1" && exit
+		has gimp      && silence gimp "$1" && exit
+		;;	
+esac
+
+[[ "$extension" == "xfc" ]] && has gimp && silence gimp "$1" && exit
