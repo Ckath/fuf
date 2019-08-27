@@ -324,6 +324,7 @@ refresh_layout()
 	if (!items) {
 		return;
 	}
+	stop_preview();
 	WINDOW *preview_w = newwin(LINES, COLS/2, 0, COLS/2);
 	WINDOW *dir_w= newwin(LINES, COLS/2, 0, 1);
 	box(preview_w, 0, 0);
@@ -408,7 +409,6 @@ refresh_layout()
 	wrefresh(preview_w);
 	delwin(dir_w);
 	delwin(preview_w);
-	stop_preview();
 	start_preview(load_preview);
 }
 
