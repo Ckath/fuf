@@ -1,7 +1,8 @@
 /* sysext.c
  * extended system functions
  * ext_kill: kills process and all child processes
- * ext_popen: popen clone that returns pid of process */
+ * ext_popen: popen clone that returns pid of process
+* ext_chldname: get name of youngest child process */
 
 #include <signal.h>
 #include <stdbool.h>
@@ -53,4 +54,32 @@ ext_popen(const char *command, int *fd)
     close(p_stdout[1]);
 	*fd = p_stdout[0];
     return pid;
+}
+
+char *
+ext_chldname(pid_t pid, char *name)
+{
+	char path[256];
+	int chld_pid = pid;
+	FILE *f;
+	do {
+		pid = chld_pid;
+		sprintf(path, "/proc/%d/task/%d/children", pid, pid);
+		f = fopen(path, "r");
+		chld_pid = 0;
+		fscanf(f, "%d", &chld_pid);
+		fclose(f);
+	} while(chld_pid);
+
+	if (!pid) {
+		name[0] = '\0';
+		return NULL;
+	}
+
+	sprintf(path, "/proc/%d/comm", pid);
+	f = fopen(path, "r");
+	fgets(name, 256, f);
+
+	fclose(f);
+	return name;
 }
