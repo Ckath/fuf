@@ -35,7 +35,7 @@ grab the default scripts and move them to local copies, you can also choose syml
 - previews showing 'command not found'\
 you are lacking a program used to generate previews, change it in the script or install them
 - some file is not opening with fuf\
-the open script isn't setup to open this file, use another open utility or add it in the open script
+either the open script isn't setup to open this filetype or you dont have any of the programs associated with the filetype installed. install the programs or edit/replace the open handler
 - the directory sizes are wrong\
 this is done on purpose, sizes are displayed as they are given by stat, calculating size of directory contents is too costly
 - no colors anywhere\
