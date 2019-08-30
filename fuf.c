@@ -198,22 +198,10 @@ open_file()
 		execlp(open_path, "open", file, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
-		char proc_path[256];
 		char proc_name[256];
-		int proc_pid = 0;
-		FILE *f;
-		sprintf(proc_path, "/proc/%d/task/%d/children", pid, pid);
-		usleep(200000); /* 200ms, time open handler has to start program */
-		f = fopen(proc_path, "r");
-		fscanf(f, "%d", &proc_pid);
-		fclose(f);
+		usleep(500000); /* 500ms, time open handler has to start program */
 
-		if (proc_pid) { /* a program was launched by open handler */
-			sprintf(proc_path, "/proc/%d/comm", proc_pid);
-			f = fopen(proc_path, "r");
-			fgets(proc_name, 256, f);
-			fclose(f);
-
+		if (ext_chldname(pid, proc_name)) { /* a program was launched by open handler */
 			/* check if its a cli program fuf should wait for */
 			char programs[strlen(CLI_PROGRAMS)+1];
 			strcpy(programs, CLI_PROGRAMS);

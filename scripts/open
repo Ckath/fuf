@@ -1,15 +1,104 @@
 #!/bin/bash
-# minimal open script
-# for use with fuf instead of xdg-open
+# this open script is originally based off of rangers rifle
+# replace with anything you want in ~/.config/fuf/open, can even be xdg-open
+# keep in mind fuf does not handle/show output or errors programs give,
+# unless its a known CLI_PROGRAM fuf should wait for completely
 
-case $(file --mime-type -b "$1") in
-	video/* | audio/*)
-		mpv --no-terminal --force-window "$1"
+# fileinfo
+mimetype=$(file --mime-type -Lb "$1")
+extension=$(/bin/echo "${1##*.}" | awk '{print tolower($0)}')
+# functions
+has() { type $1 &> /dev/null; }   # check if program is available
+runquiet() { "$@" &> /dev/null; }  # run without output on terminal
+
+#-------------------------------------------
+# Misc
+#-------------------------------------------
+# Define the "editor" for text files as first action
+[[ $mimetype == text/* ]] && (${VISUAL:-$EDITOR} "$1" && exit)
+case $extension in
+	xml|json|csv|tex|py|pl|rb|js|sh|php|?html?)
+		${VISUAL:-$EDITOR} "$1" && exit;;
+esac
+
+#--------------------------------------------
+# Video/Audio
+#-------------------------------------------
+case $mimetype in
+	audio/*)
+		has mpv      && runquiet mpv --force-window "$1" && exit
 		;;
-	image/*)
-		mpv --loop-file=inf --no-terminal "$1"
-		;;
-	text/* | */json)
-		$EDITOR "$1"
+	video/*)
+		has mpv      && runquiet mpv "$1" && exit
+		has mplayer2 && runquiet mplayer2 "$1" && exit
+		has mplayer  && runquiet mplayer "$1" && exit
+		has gmplayer && runquiet gmplayer "$1" && exit
+		has smplayer && runquiet smplayer "$1" && exit
+		has vlc      && runquiet vlc "$1" && exit
+		has totem    && runquiet totem "$1" && exit
 		;;
 esac
+
+#-------------------------------------------
+# Documents
+#-------------------------------------------
+case $extension in
+	pdf)
+		has zathura   && runquiet zathura "$1" && exit
+		has llpp      && runquiet llpp "$1" && exit
+		has mupdf     && runquiet mupdf "$1" && exit
+		has mupdf-x11 && runquiet mupdf-x11 "$1" && exit
+		has apvlv     && runquiet apvlv "$1" && exit
+		has xpdf      && runquiet xpdf "$1" && exit
+		has evince    && runquiet evince "$1" && exit
+		has atril     && runquiet atril "$1" && exit
+		has okular    && runquiet okular "$1" && exit
+		has epdfview  && runquiet epdfview "$1" && exit
+		has qpdfview  && runquiet qpdfview "$1" && exit
+		has firefox	  && runquiet firefox "$1" && exit
+		;;
+	sxc|xlsx?|xlt|xlw|gnm|gnumeric)
+		has gnumeric && silent gnumeric "$1" && exit
+		has kspread  && silent kspread "$1" && exit
+		;;
+	pptx?|od[dfgpst]|docx?|sxc|xlsx?|xlt|xlw|gnm|gnumeric)
+		has libreoffice && silent libreoffice "$1" && exit
+		has soffice     && silent soffice "$1" && exit
+		has ooffice     && silent ooffice "$1" && exit
+		;;
+	djvu)
+		has zathura && runquiet zathura "$1" && exit
+		has evince  && runquiet evince "$1" && exit
+		has atril   && runquiet atril "$1" && exit
+		has djview  && runquiet djview "$1" && exit
+		;;
+	epub|mobi)
+		has ebook-viewer && runquiet ebook-viewer "$1"
+		;;
+esac
+
+#-------------------------------------------
+# Image Viewing:
+#-------------------------------------------
+case $mimetype in
+	image/svg*)
+		has display  && runquiet display "$1" && exit
+		has inkscape && runquiet inkscape "$1" && exit
+		;;
+	image/*)
+		has pqiv      && runquiet pqiv "$1" && exit
+		has sxiv      && runquiet sxiv "$1" && exit
+		has feh       && runquiet feh "$1" && exit
+		has mirage    && runquiet mirage "$1" && exit
+		has ristretto && runquiet ristretto "$1" && exit
+		has eog       && runquiet eog "$1" && exit
+		has eom       && runquiet eom "$1" && exit
+		has nomacs    && runquiet nomacs "$1" && exit
+		has geeqie    && runquiet geeqie "$1" && exit
+		has gwenview  && runquiet gwenview "$1" && exit
+		has mpv       && runquiet mpv --loop-file=inf "$1" && exit
+		has gimp      && runquiet gimp "$1" && exit
+		;;	
+esac
+
+[[ "$extension" == "xfc" ]] && has gimp && runquiet gimp "$1" && exit
