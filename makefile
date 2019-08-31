@@ -25,10 +25,10 @@ install: ${NAME}
 	@cp -f ${NAME} ${DESTDIR}/bin/${NAME}
 	@chmod 755 ${DESTDIR}/bin/${NAME}
 	@echo installing scripts
-	@mkdir -p /usr/lib/${NAME}
-	@cp -f scripts/* /usr/lib/${NAME}
+	@mkdir -p ${DESTDIR}/lib/${NAME}
+	@cp -f scripts/* ${DESTDIR}/lib/${NAME}
 uninstall: ${NAME}
 	@echo removing executable file from ${DESTDIR}/bin
 	@rm -f ${DESTDIR}/bin/${NAME}
 	@echo removing scripts
-	@rm -rf /usr/lib/${NAME}
+	@rm -rf ${DESTDIR}/lib/${NAME}
