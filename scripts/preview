@@ -1,4 +1,3 @@
-#!/bin/bash
 # this preview script is originally based off of rangers scope.sh
 # unlike ranger, fuf expects the preview script to handle everything
 # its also expected to be executed within the directory of the file
@@ -52,6 +51,7 @@ clearimg # clear any img
 case "$mimetype" in
 	# Image previews for SVG files, disabled by default.
 	image/svg+xml)
+		cached="$cached.png"
 		convert "$1" "$cached" && displayimg "$cached"
 		exit;;
 	# Image previews for PDF files
