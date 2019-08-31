@@ -435,9 +435,8 @@ main(int argc, char *argv[])
 				sort = Time_cmp;
 				break;
 			case 'v':
-				puts("todo");
+				puts("fuf-"VERSION);
 				exit(0);
-				break;
 			case 'h':
 			default:
 				usage();
