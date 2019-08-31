@@ -292,11 +292,11 @@ load_preview()
 	int fd;
 	FILE *fp = NULL;
 	int l = 0;
-	char buf[COLS/2];
+	char buf[COLS];
 	extern pid_t preview_pid;
 	preview_pid = ext_popen(preview_cmd, &fd);
 	fp = fdopen(fd, "r");
-	while (fgets(buf, COLS/2, fp)) {
+	while (fgets(buf, COLS, fp)) {
 		mvwaddstr(preview_w, l++, 0, buf);
 	}
 	wrefresh(preview_w);
