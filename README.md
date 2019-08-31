@@ -32,8 +32,10 @@ current bugs, features and enhancements in the works are kept track of in [issue
 grab the default scripts and move them to local copies, you can also choose symlink xdg-open or other open managers to ~/.config/fuf/open at this point. the fuf preview and open executables/scripts fully handle opening and previewing files, this means you can customize the way this is handled completely within these scripts.
 
 ## non issues/wontfix
-- previews showing 'command not found'\
+- preview showing `no preview configured`
 you are lacking a program used to generate previews, change it in the script or install them
+- image previews not working
+w3m is used to display the (generated) images, make sure your terminal supports this
 - some file is not opening with fuf\
 either the open script isn't setup to open this filetype or you dont have any of the programs associated with the filetype installed. install the programs or edit/replace the open handler
 - the directory sizes are wrong\
