@@ -363,7 +363,6 @@ refresh_layout()
 		wattroff(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 	} else {
 		char fs[69];
-		ext_filesize(sb.st_size, fs);
 		char *ext = strrchr(items[sel_item].name, '.');
 		ext = ext == items[sel_item].name ? NULL : ext;
 		mvwprintw(dir_w, LINES-1, 0, ext ?
@@ -389,7 +388,7 @@ refresh_layout()
 			sb.st_nlink,
 			getpwuid(sb.st_uid) ? getpwuid(sb.st_uid)->pw_name : "???",
 			getgrgid(sb.st_gid) ? getgrgid(sb.st_gid)->gr_name : "???",
-			fs, ext);
+			ext_filesize(sb.st_size, fs), ext);
 		char timedate[80];                  /* right corner */
 		strftime(timedate, 80, "%x %a %H:%M:%S", localtime(&items[sel_item].mtime));
 		mvwaddstr(preview_w, LINES-1, COLS/2-strlen(timedate), timedate);
