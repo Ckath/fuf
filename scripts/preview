@@ -62,7 +62,7 @@ case "$mimetype" in
 		displayimg "$1"
 		exit;;
 	# Image preview for video, disabled by default.:
-	video/*)
+	video/* | */x-shockwave-flash)
 		ffmpegthumbnailer -i "$1" -o "$cached" -s 0 && displayimg "$cached"
 		exit;;
 esac
