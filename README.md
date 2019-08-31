@@ -23,6 +23,9 @@ current bugs, features and enhancements in the works are kept track of in [issue
 
 ## setup
 ### install
+#### arch
+install either [fuf](https://aur.archlinux.org/packages/fuf) or [fuf-git](https://aur.archlinux.org/packages/fuf-git)
+#### manual
 `sudo make install`\
 \* ncurses, pthreads and a posix system is required to compile fuf
 ### uninstall
