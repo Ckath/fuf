@@ -362,11 +362,13 @@ refresh_layout()
 		mvwaddstr(dir_w, LINES-1, 0, "file not found");
 		wattroff(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 	} else {
+		char fs[69];
+		ext_filesize(sb.st_size, fs);
 		char *ext = strrchr(items[sel_item].name, '.');
 		ext = ext == items[sel_item].name ? NULL : ext;
 		mvwprintw(dir_w, LINES-1, 0, ext ?
-				"%c%c%c%c%c%c%c%c%c%c %d %s %s %lu %s" :
-				"%c%c%c%c%c%c%c%c%c%c %d %s %s %lu",
+				"%c%c%c%c%c%c%c%c%c%c %d %s %s %s %s" :
+				"%c%c%c%c%c%c%c%c%c%c %d %s %s %s",
 			S_ISDIR(sb.st_mode) ? 'd' :
 			S_ISLNK(sb.st_mode) ? 'l' : '-',
 			sb.st_mode & S_IRUSR ? 'r' : '-',
@@ -387,7 +389,7 @@ refresh_layout()
 			sb.st_nlink,
 			getpwuid(sb.st_uid) ? getpwuid(sb.st_uid)->pw_name : "???",
 			getgrgid(sb.st_gid) ? getgrgid(sb.st_gid)->gr_name : "???",
-			sb.st_size, ext);
+			fs, ext);
 		char timedate[80];                  /* right corner */
 		strftime(timedate, 80, "%x %a %H:%M:%S", localtime(&items[sel_item].mtime));
 		mvwaddstr(preview_w, LINES-1, COLS/2-strlen(timedate), timedate);

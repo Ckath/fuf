@@ -2,7 +2,8 @@
  * extended system functions
  * ext_kill: kills process and all child processes
  * ext_popen: popen clone that returns pid of process
-* ext_chldname: get name of youngest child process */
+ * ext_chldname: get name of youngest child process 
+ * ext_filesize: human readable filesize */
 
 #include <signal.h>
 #include <stdbool.h>
@@ -82,4 +83,18 @@ ext_chldname(pid_t pid, char *name)
 
 	fclose(f);
 	return name;
+}
+
+char *
+ext_filesize(long size, char *humanfs)
+{
+	const char units[] = {'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'};
+	int i = 0;
+	double fs = (double) size;
+	while (fs > 1024) {
+		fs /= 1024;
+		++i;
+	}
+	sprintf(humanfs, "%.*f%c", i, fs, units[i-1]);
+	return humanfs;
 }
