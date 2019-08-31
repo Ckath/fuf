@@ -37,6 +37,8 @@ case $mimetype in
 		has vlc      && runquiet vlc "$1" && exit
 		has totem    && runquiet totem "$1" && exit
 		;;
+	*/x-shockwave-flash)
+		has flashplayer && runquiet flashplayer "$1" && exit
 esac
 
 #-------------------------------------------
