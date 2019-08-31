@@ -22,7 +22,7 @@ mimetype=$(file --mime-type -Lb "$path")
 extension=$(/bin/echo "${path##*.}" | awk '{print tolower($0)}')
 
 # functions
-has() { type $1 &> /dev/null; }              # check if program is available
+has() { type $1 &> /dev/null; }                   # check if program is available
 trim() { head -n $height | colrm $(($width+1)); } # trim output to preview window
 
 # clears preview img area
@@ -70,52 +70,52 @@ case "$mimetype" in
 esac
 
 case "$extension" in
-    # Archive extensions:
-    a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
-    rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
-        has unzip  && unzip -l "$path"|trim && exit
-        has als    && als "$path"|trim && exit
-        has acat   && acat "$path"|trim && exit
-        has bsdtar && bsdtar -lf "$path"|trim && exit
+	# Archive extensions:
+	a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
+	rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
+		has unzip  && unzip -l "$path"|trim && exit
+		has als    && als "$path"|trim && exit
+		has acat   && acat "$path"|trim && exit
+		has bsdtar && bsdtar -lf "$path"|trim && exit
 		;;
-    rar)
-        # avoid password prompt by providing empty password
-        has unrar && unrar -p- l "$path"|trim && exit;;
-    7z)
-        # avoid password prompt by providing empty password
-        has 7z && 7z -p l "$path"|trim && exit;;
-    # PDF documents:
-    pdf)
-        has pdftotext && pdftotext -l 10 -nopgbrk -q "$path" -|trim && exit;;
-    # BitTorrent Files
-    torrent)
-        has transmission-show && transmission-show "$path"|trim && exit;;
-    # ODT Files
-    odt|ods|odp|sxw)
-        has odt2txt && odt2txt "$path"|trim && exit;;
-    # HTML Pages:
-    htm|html|xhtml)
-        has w3m    && w3m -dump "$path"|trim && exit
-        has lynx   && lynx -dump "$path"|trim && exit
-        has elinks && elinks -dump "$path"|trim && exit
+	rar)
+		# avoid password prompt by providing empty password
+		has unrar && unrar -p- l "$path"|trim && exit;;
+	7z)
+		# avoid password prompt by providing empty password
+		has 7z && 7z -p l "$path"|trim && exit;;
+	# PDF documents:
+	pdf)
+		has pdftotext && pdftotext -l 10 -nopgbrk -q "$path" -|trim && exit;;
+	# BitTorrent Files
+	torrent)
+		has transmission-show && transmission-show "$path"|trim && exit;;
+	# ODT Files
+	odt|ods|odp|sxw)
+		has odt2txt && odt2txt "$path"|trim && exit;;
+	# HTML Pages:
+	htm|html|xhtml)
+		has w3m    && w3m -dump "$path"|trim && exit
+		has lynx   && lynx -dump "$path"|trim && exit
+		has elinks && elinks -dump "$path"|trim && exit
 		;;
 esac
 
 case "$mimetype" in
-    # Syntax highlight for text files:
-    text/* | */xml)
-        has cat && cat "$path"|trim && exit;;
-    # Ascii-previews of images:
-    image/*)
-        has img2txt && img2txt --gamma=0.6 --width="$width" "$path"|trim && exit;;
-    # Display information about media files:
-    video/* | audio/*)
-        has exiftool  && exiftool "$path"|trim && exit
-        has mediainfo && mediainfo "$path"|trim && exit
+	# Syntax highlight for text files:
+	text/* | */xml)
+		has cat && cat "$path"|trim && exit;;
+	# Ascii-previews of images:
+	image/*)
+		has img2txt && img2txt --gamma=0.6 --width="$width" "$path"|trim && exit;;
+	# Display information about media files:
+	video/* | audio/*)
+		has exiftool  && exiftool "$path"|trim && exit
+		has mediainfo && mediainfo "$path"|trim && exit
 		;;
 	inode/directory)
 		has tree && tree "$path"|trim && exit
-		has ls && ls -l "$path"|trim && exit
+		has ls   && ls -l "$path"|trim && exit
 		;;
 esac
 
