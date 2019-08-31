@@ -9,7 +9,7 @@ mimetype=$(file --mime-type -Lb "$1")
 extension=$(/bin/echo "${1##*.}" | awk '{print tolower($0)}')
 # functions
 has() { type $1 &> /dev/null; }   # check if program is available
-runquiet() { "$@" &> /dev/null; }  # run without output on terminal
+runquiet() { "$@" &> /dev/null; } # run without output on terminal
 
 #-------------------------------------------
 # Misc
