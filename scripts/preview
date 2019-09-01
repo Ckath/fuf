@@ -54,18 +54,21 @@ case "$mimetype" in
 	# Image previews for SVG files, disabled by default.
 	image/svg+xml)
 		cached="$cached.png"
-		convert "$path" "$cached" && displayimg "$cached"
+		convert "$path" "$cached" &> /tmp/fufimgerr \
+		&& displayimg "$cached" || cat /tmp/fufimgerr
 		exit;;
 	# Image previews for PDF files
 	application/pdf)
-		pdftoppm -jpeg -singlefile "$path" "${cached//.jpg}" && displayimg "$cached".jpg
+		pdftoppm -jpeg -singlefile "$path" "${cached//.jpg}" &> /tmp/fufimgerr \
+		&& displayimg "$cached" || cat /tmp/fufimgerr
 		exit;;
 	image/*)
 		displayimg "$path"
 		exit;;
 	# Image preview for video, disabled by default.:
 	video/* | */x-shockwave-flash)
-		ffmpegthumbnailer -i "$path" -o "$cached" -s 0 && displayimg "$cached"
+		ffmpegthumbnailer -i "$path" -o "$cached" -s 0 &> /tmp/fufimgerr \
+		&& displayimg "$cached" || cat /tmp/fufimgerr
 		exit;;
 esac
 
