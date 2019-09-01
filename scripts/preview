@@ -60,7 +60,7 @@ case "$mimetype" in
 	# Image previews for PDF files
 	application/pdf)
 		pdftoppm -jpeg -singlefile "$path" "${cached//.jpg}" &> /tmp/fufimgerr \
-		&& displayimg "$cached" || cat /tmp/fufimgerr
+		&& displayimg "$cached.jpg" || cat /tmp/fufimgerr
 		exit;;
 	image/*)
 		displayimg "$path"
