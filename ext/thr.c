@@ -39,7 +39,7 @@ void
 stop_preview()
 {
 	if (preview_pid) {
-		ext_kill(preview_pid, SIGTERM);
+		ext_kill(preview_pid, SIGKILL);
 	} if (preview_thr) {
 		pthread_join(preview_thr, NULL);
 	}

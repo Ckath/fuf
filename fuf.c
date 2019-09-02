@@ -312,7 +312,6 @@ refresh_layout()
 	if (!items) {
 		return;
 	}
-	stop_preview();
 	WINDOW *preview_w = newwin(LINES, COLS/2, 0, COLS/2);
 	WINDOW *dir_w= newwin(LINES, COLS/2, 0, 1);
 	box(preview_w, 0, 0);
@@ -460,6 +459,7 @@ main(int argc, char *argv[])
 	char cwd[PATH_MAX];
 	char ch;
 	while((ch = getch()) != 'q') {
+		stop_preview();
 		stop_load();
 		switch(ch) {
 			case 'j':
