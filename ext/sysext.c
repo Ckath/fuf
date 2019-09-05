@@ -95,6 +95,6 @@ ext_filesize(long size, char *humanfs)
 		fs /= 1024;
 		++i;
 	}
-	sprintf(humanfs, "%.*f%c", i, fs, units[i-1]);
+	sprintf(humanfs, i ? "%.*f%c":"%.*f", i, fs, units[i-1]);
 	return humanfs;
 }
