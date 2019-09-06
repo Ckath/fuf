@@ -235,7 +235,7 @@ open_with(char *launcher, bool cli)
 		char file[256];
 		char cmd[PATH_MAX];
 		strcpy(file, items[sel_item].name);
-		sprintf(cmd, "%s \"%s\"", launcher, file);
+		sprintf(cmd, cli ? "%s \"%s\"":"%s \"%s\"&>/dev/null", launcher, file);
 		free(items);
 		execl("/bin/bash", "bash", "-c", cmd, NULL);
 		_exit(1);
