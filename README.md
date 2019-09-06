@@ -17,6 +17,8 @@ another cli filebrowser made just for myself with the following ideas:
 `s`: sort (+`a`/`A` alphabetical, +`s`/`S` size based, +`t`/`T` time based)\
 `r`: reload\
 `R`: force redraw of ui
+`o`: open file with program, don't wait/non cli
+`O`: open file with program, wait/cli
 
 ## development
 current bugs, features and enhancements in the works are kept track of in [issues](https://github.com/Ckath/fuf/issues), refer to this to see what's happening at the moment. PRs are always welcome, but make an issue first to discuss any new features or bugs.

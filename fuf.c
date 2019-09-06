@@ -28,6 +28,7 @@ static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
 static void search_next(bool reverse);
 static void open_file();      /* async */
+static void open_with(char *launcher, bool cli);
 static void display_load();
 static void load_items();
 static void load_preview();
@@ -216,6 +217,32 @@ open_file()
 			}
 		} else { /* edge case: open handler didnt launch anything */
 			while(wait(NULL) != pid);
+		}
+
+		/* set sigchld handler, no zombies allowed */
+		signal(SIGCHLD, SIG_IGN);
+	}
+}
+
+static void
+open_with(char *launcher, bool cli)
+{
+	/* clear sigchld handler, might want to wait */
+	signal(SIGCHLD, SIG_DFL);
+
+	pid_t pid = fork();
+	if (!pid) { /* child: open file */
+		char file[256];
+		char cmd[PATH_MAX];
+		strcpy(file, items[sel_item].name);
+		sprintf(cmd, "%s \"%s\"", launcher, file);
+		free(items);
+		execl("/bin/bash", "bash", "-c", cmd, NULL);
+		_exit(1);
+	} else { /* parent: check launched process */
+		if (cli) {
+			while(wait(NULL) != pid);
+			handle_redraw(); /* redraw since its probably fucked */
 		}
 
 		/* set sigchld handler, no zombies allowed */
@@ -457,6 +484,7 @@ main(int argc, char *argv[])
 	init();
 
 	/* main key handling loop */
+	char launcher[256];
 	char cwd[PATH_MAX];
 	char ch;
 	while((ch = getch()) != 'q') {
@@ -639,6 +667,18 @@ main(int argc, char *argv[])
 						break;
 				}
 				refresh_layout();
+				break;
+			case 'o':
+				str_prompt("open with: ", launcher);
+				if (launcher) {
+					open_with(launcher, false);
+				}
+				break;
+			case 'O':
+				str_prompt("open with: ", launcher);
+				if (launcher) {
+					open_with(launcher, true);
+				}
 				break;
 		}
 	}
