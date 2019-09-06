@@ -188,7 +188,7 @@ search_next(bool reverse)
 static void
 open_file()
 {
-	/* clear sigchld handler, might want to wait */
+	/* reset sigchld handler, might want to wait */
 	signal(SIGCHLD, SIG_DFL);
 
 	pid_t pid = fork();
@@ -219,7 +219,7 @@ open_file()
 			while(wait(NULL) != pid);
 		}
 
-		/* set sigchld handler, no zombies allowed */
+		/* ignore sigchld, no zombies allowed */
 		signal(SIGCHLD, SIG_IGN);
 	}
 }
@@ -227,7 +227,7 @@ open_file()
 static void
 open_with(char *launcher, bool cli)
 {
-	/* clear sigchld handler, might want to wait */
+	/* reset sigchld handler, might want to wait */
 	signal(SIGCHLD, SIG_DFL);
 
 	pid_t pid = fork();
@@ -245,7 +245,7 @@ open_with(char *launcher, bool cli)
 			handle_redraw(); /* redraw since its probably fucked */
 		}
 
-		/* set sigchld handler, no zombies allowed */
+		/* ignore sigchld, no zombies allowed */
 		signal(SIGCHLD, SIG_IGN);
 	}
 }
