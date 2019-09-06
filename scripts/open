@@ -60,13 +60,13 @@ case $extension in
 		has firefox	  && runquiet firefox "$1" && exit
 		;;
 	sxc|xlsx?|xlt|xlw|gnm|gnumeric)
-		has gnumeric && silent gnumeric "$1" && exit
-		has kspread  && silent kspread "$1" && exit
+		has gnumeric && runquiet gnumeric "$1" && exit
+		has kspread  && runquiet kspread "$1" && exit
 		;;
-	pptx?|od[dfgpst]|docx?|sxc|xlsx?|xlt|xlw|gnm|gnumeric)
-		has libreoffice && silent libreoffice "$1" && exit
-		has soffice     && silent soffice "$1" && exit
-		has ooffice     && silent ooffice "$1" && exit
+	ppt?|od[dfgpst]|doc?|doc|sxc|xlsx|xlt|xlw|gnm|gnumeric)
+		has libreoffice && runquiet libreoffice "$1" && exit
+		has soffice     && runquiet soffice "$1" && exit
+		has ooffice     && runquiet ooffice "$1" && exit
 		;;
 	djvu)
 		has zathura && runquiet zathura "$1" && exit
