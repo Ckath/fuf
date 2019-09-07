@@ -687,7 +687,6 @@ main(int argc, char *argv[])
 			case 't':
 				endwin();
 				open_with(getenv("SHELL"), NULL, true);
-				handle_redraw();
 				break;
 		}
 	}
