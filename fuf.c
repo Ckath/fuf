@@ -28,7 +28,7 @@ static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
 static void search_next(bool reverse);
 static void open_file();      /* async */
-static void open_with(char *launcher, bool cli);
+static void open_with(char *launcher, char *file, bool cli);
 static void display_load();
 static void load_items();
 static void load_preview();
@@ -225,18 +225,18 @@ open_file()
 }
 
 static void
-open_with(char *launcher, bool cli)
+open_with(char *launcher, char *file, bool cli)
 {
 	/* reset sigchld handler, might want to wait */
 	signal(SIGCHLD, SIG_DFL);
 
 	pid_t pid = fork();
 	if (!pid) { /* child: open file */
-		char file[256];
-		char cmd[PATH_MAX];
-		strcpy(file, items[sel_item].name);
-		sprintf(cmd, cli ? "%s \"%s\"":"%s \"%s\"&>/dev/null", launcher, file);
 		free(items);
+		char cmd[PATH_MAX];
+		sprintf(cmd, cli ? file ? "%s \"%s\"":"%s":
+				file ? "%s \"%s\"&>/dev/null":"%s &>/dev/null",
+				launcher, file);
 		execl("/bin/bash", "bash", "-c", cmd, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
@@ -671,7 +671,7 @@ main(int argc, char *argv[])
 			case 'o':
 				str_prompt("open with: ", launcher);
 				if (launcher[0]) {
-					open_with(launcher, false);
+					open_with(launcher, items[sel_item].name, false);
 				} else {
 					refresh_layout();
 				}
@@ -679,10 +679,15 @@ main(int argc, char *argv[])
 			case 'O':
 				str_prompt("open with: ", launcher);
 				if (launcher[0]) {
-					open_with(launcher, true);
+					open_with(launcher, items[sel_item].name, true);
 				} else {
 					refresh_layout();
 				}
+				break;
+			case 't':
+				endwin();
+				open_with(getenv("SHELL"), NULL, true);
+				handle_redraw();
 				break;
 		}
 	}
