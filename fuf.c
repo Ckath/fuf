@@ -670,14 +670,18 @@ main(int argc, char *argv[])
 				break;
 			case 'o':
 				str_prompt("open with: ", launcher);
-				if (launcher) {
+				if (launcher[0]) {
 					open_with(launcher, false);
+				} else {
+					refresh_layout();
 				}
 				break;
 			case 'O':
 				str_prompt("open with: ", launcher);
-				if (launcher) {
+				if (launcher[0]) {
 					open_with(launcher, true);
+				} else {
+					refresh_layout();
 				}
 				break;
 		}
