@@ -4,11 +4,13 @@
 #include <libgen.h>
 #include <locale.h>
 #include <ncurses.h>
+#include <pthread.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -84,6 +86,7 @@ init()
 	/* init fuf */
 	handle_redraw();
 	start_load(load_items, display_load);
+	init_preview(load_preview);
 	signal(SIGWINCH, handle_redraw);
 	signal(SIGCHLD, SIG_IGN);
 }
@@ -277,33 +280,40 @@ load_items()
 static void
 load_preview()
 {
-	/* gets called once before anything is loaded somehow */
-	if (!items_len) {
-		return;
-	}
-	WINDOW *preview_w = newwin(LINES-2, COLS/2-2, 1, COLS/2+1);
-
 	char file[256];
-	strcpy(file, items[sel_item].name);
-	char preview_cmd[PATH_MAX];
-	sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
- 			preview_path, file, COLS/2-2, LINES-2);
+	prctl(PR_SET_NAME, "preview");
+	extern pthread_cond_t run_preview;
+	extern pthread_mutex_t preview_lock;
+	for (;;) {
+		pthread_mutex_lock(&preview_lock);
+		while(!items || !strcmp(file, items[sel_item].name)) {
+			pthread_cond_wait(&run_preview, &preview_lock);
+		}
+		pthread_mutex_unlock(&preview_lock);
 
-	int fd;
-	FILE *fp = NULL;
-	int l = 0;
-	char buf[COLS];
-	extern pid_t preview_pid;
-	preview_pid = ext_popen(preview_cmd, &fd);
-	fp = fdopen(fd, "r");
-	while (fgets(buf, COLS, fp)) {
-		mvwaddstr(preview_w, l++, 0, buf);
+		WINDOW *preview_w = newwin(LINES-2, COLS/2-2, 1, COLS/2+1);
+
+		strcpy(file, items[sel_item].name);
+		char preview_cmd[PATH_MAX];
+		sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
+				preview_path, file, COLS/2-2, LINES-2);
+
+		int fd;
+		FILE *fp = NULL;
+		int l = 0;
+		char buf[COLS];
+		extern pid_t preview_pid;
+		preview_pid = ext_popen(preview_cmd, &fd);
+		fp = fdopen(fd, "r");
+		while (fgets(buf, COLS, fp)) {
+			mvwaddstr(preview_w, l++, 0, buf);
+		}
+		wrefresh(preview_w);
+		delwin(preview_w);
+
+		fclose(fp);
+		preview_pid = 0;
 	}
-	wrefresh(preview_w);
-	delwin(preview_w);
-
-	fclose(fp);
-	preview_pid = 0;
 }
 
 static void
@@ -397,7 +407,7 @@ refresh_layout()
 	wrefresh(preview_w);
 	delwin(dir_w);
 	delwin(preview_w);
-	start_preview(load_preview);
+	queue_preview();
 }
 
 static void
@@ -459,7 +469,7 @@ main(int argc, char *argv[])
 	char cwd[PATH_MAX];
 	char ch;
 	while((ch = getch()) != 'q') {
-		stop_preview();
+		cancel_preview();
 		stop_load();
 		switch(ch) {
 			case 'j':

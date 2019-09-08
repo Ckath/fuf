@@ -10,6 +10,8 @@
 pthread_t load_thr;
 pthread_t display_thr;
 pthread_t preview_thr;
+pthread_cond_t run_preview = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t preview_lock = PTHREAD_MUTEX_INITIALIZER;
 pid_t preview_pid = 0;
 bool items_loading = false;
 
@@ -30,17 +32,23 @@ stop_load()
 }
 
 void
-start_preview(void *load_preview)
+init_preview(void *load_preview)
 {
 	pthread_create(&preview_thr, NULL, load_preview, NULL);
 }
 
 void
-stop_preview()
+queue_preview()
+{
+	pthread_mutex_lock(&preview_lock);
+	pthread_cond_signal(&run_preview);
+	pthread_mutex_unlock(&preview_lock);
+}
+
+void
+cancel_preview()
 {
 	if (preview_pid) {
 		ext_kill(preview_pid, SIGKILL);
-	} if (preview_thr) {
-		pthread_join(preview_thr, NULL);
 	}
 }
