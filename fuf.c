@@ -286,9 +286,9 @@ load_preview()
 	extern pthread_mutex_t preview_lock;
 	for (;;) {
 		pthread_mutex_lock(&preview_lock);
-		while(!items || !strcmp(file, items[sel_item].name)) {
+		do {
 			pthread_cond_wait(&run_preview, &preview_lock);
-		}
+		} while(!items); /* edgecase, called before items are loaded */
 		pthread_mutex_unlock(&preview_lock);
 
 		WINDOW *preview_w = newwin(LINES-2, COLS/2-2, 1, COLS/2+1);
