@@ -16,9 +16,9 @@ another cli filebrowser made just for myself with the following ideas:
 ### non vim
 `s`: sort (+`a`/`A` alphabetical, +`s`/`S` size based, +`t`/`T` time based)\
 `r`: reload\
-`R`: force redraw of ui
-`o`: open file with program, don't wait/non cli
-`O`: open file with program, wait/cli
+`R`: force redraw of ui\
+`o`: open file with program, don't wait/non cli\
+`O`: open file with program, wait/cli\
 `t`: open shell in current directory, exit it to return to fuf
 
 ## development
