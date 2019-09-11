@@ -9,6 +9,7 @@ another cli filebrowser made just for myself with the following ideas:
 - more respect for `LS_COLORS`
 - no fancy file edit operations, at most drop to shell
 - no fancy in depth configuration besides the scripts
+- minimize hanging due to unneeded disk io
 
 ## keybinds
 ### vim - work mostly as expected

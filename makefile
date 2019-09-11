@@ -2,7 +2,7 @@ NAME = fuf
 VERSION = 0.1
 CFLAGS = 
 LIBS = -lncurses -lpthread
-SRC = ${NAME}.c ext/colors.c ext/sort.c ext/thr.c ext/sysext.c
+SRC = ${NAME}.c ext/colors.c ext/sort.c ext/thr.c ext/sysext.c ext/sncurses.c
 OBJ = ${SRC:.c=.o}
 DESTDIR = /usr
 CC = gcc

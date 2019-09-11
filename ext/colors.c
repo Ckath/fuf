@@ -8,6 +8,7 @@
 #include <wchar.h>
 #include <unistd.h>
 #include "colors.h"
+#include "sncurses.h"
 
 void
 init_colors()
@@ -20,7 +21,7 @@ init_colors()
 	 * fg: first 4 bits, bg: last 4 bits */
 	for (int fg = COLOR_DEFAULT; fg <= COLOR_WHITE; ++fg) {
 		for (int bg = COLOR_DEFAULT; bg <= COLOR_WHITE; ++bg) {
-			init_pair(COL(fg, bg), fg, bg);
+			sinit_pair(COL(fg, bg), fg, bg);
 		}
 	}
 }
@@ -150,7 +151,7 @@ mvwaddcolitem(WINDOW *win, int y, int x, const char *name, mode_t mode)
 	}
 
 	if (!getenv("LS_COLORS")) {
-		mvwaddstr(win, y, x-1, fname);
+		smvwaddstr(win, y, x-1, fname);
 		return;
 	}
 
@@ -210,7 +211,7 @@ mvwaddcolitem(WINDOW *win, int y, int x, const char *name, mode_t mode)
 		attrs = find_lsattrs("no");
 	}
 
-	wattron(win, attrs);
-	mvwaddstr(win, y, x-1, fname);
-	wattroff(win, attrs);
+	swattron(win, attrs);
+	smvwaddstr(win, y, x-1, fname);
+	swattroff(win, attrs);
 }
