@@ -379,9 +379,15 @@ refresh_layout()
 	
 	/* top bar */
 	char cwd[PATH_MAX]; /* left corner */
-	getcwd(cwd, PATH_MAX);
-	smvwaddstr(dir_w, 0, 0, strlen(cwd) > COLS/2 ?
-			cwd + (strlen(cwd)-COLS/2+1)/2*2 : cwd);
+	bool cwdok = getcwd(cwd, PATH_MAX);
+	if (cwdok) {
+		smvwaddstr(dir_w, 0, 0, strlen(cwd) > COLS/2 ?
+				cwd + (strlen(cwd)-COLS/2+1)/2*2 : cwd);
+	} else {
+		swattron(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
+		smvwaddstr(dir_w, 0, 0, "dir not found");
+		swattroff(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
+	}
 	char index[80];    /* right corner */
 	sprintf(index, "%u/%u", sel_item+1, items_len);
 	smvwaddstr(preview_w, 0, COLS/2-strlen(index), index);
@@ -439,7 +445,9 @@ refresh_layout()
 	swrefresh(preview_w);
 	sdelwin(dir_w);
 	sdelwin(preview_w);
-	queue_preview();
+	if (cwdok) {
+		queue_preview();
+	}
 }
 static void
 usage()
