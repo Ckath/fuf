@@ -31,7 +31,8 @@ current bugs, features and enhancements in the works are kept track of in [issue
 install either [fuf](https://aur.archlinux.org/packages/fuf) or [fuf-git](https://aur.archlinux.org/packages/fuf-git)
 #### manual
 `sudo make install`\
-\* ncurses, pthreads and a posix system is required to compile fuf
+\* ncurses, pthreads and a linux** system are required to compile fuf\
+\*\* only ever tested on arch
 ### uninstall
 `sudo make uninstall`
 ### configuration
@@ -55,6 +56,8 @@ this will never be added, it annoys me
 these are whitelisted in fuf in the `CLI_PROGRAMS` definition in fuf.c, make a pr or issue for one to be added
 - issues related to scripts remain after update that should fix them\
 since fuf allows you use your own versions of the scripts in ~/.config/fuf its up to yourself to keep up with patching these with the latest changes from the /usr/lib/fuf supplied ones.
+- doesn't compile/work under *some architecture/distro/os*\
+fuf was 100% made for and on arch, if it works elsewhere neat but that was never a goal
 
 ## inspirations
 - [ranger](https://github.com/ranger/ranger): the cli fm that annoyed me to the point of writing my own
