@@ -3,6 +3,8 @@
 #include <ncurses.h>
 
 int sinit_pair(short pair, short f, short b);
+int sendwin(void);
+int srefresh(void);
 WINDOW *snewwin(int nlines, int ncols, int begin_y, int begin_x);
 int sdelwin(WINDOW *win);
 int sbox(WINDOW *win, chtype verch, chtype horch);

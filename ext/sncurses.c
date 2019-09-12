@@ -16,6 +16,24 @@ sinit_pair(short pair, short f, short b)
 	return r;
 }
 
+int
+sendwin(void)
+{
+	pthread_mutex_lock(&ncurses_lock);
+	int r = endwin();
+	pthread_mutex_unlock(&ncurses_lock);
+	return r;
+}
+
+int
+srefresh(void)
+{
+	pthread_mutex_lock(&ncurses_lock);
+	int r = refresh();
+	pthread_mutex_unlock(&ncurses_lock);
+	return r;
+}
+
 WINDOW *
 snewwin(int nlines, int ncols, int begin_y, int begin_x)
 {
