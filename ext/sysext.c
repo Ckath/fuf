@@ -28,7 +28,7 @@ ext_kill(pid_t pid, int sig)
 		fscanf(f, "%d", &child_pid);
 		fclose(f);
 		kill(pid, sig);
-		pid = child_pid;
+		pid = pid == child_pid ? 0 : child_pid;
 	}
 }
 

@@ -4,16 +4,19 @@
 #include <libgen.h>
 #include <locale.h>
 #include <ncurses.h>
+#include <pthread.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 #include "ext/colors.h"
+#include "ext/sncurses.h"
 #include "ext/sort.h"
 #include "ext/sysext.h"
 #include "ext/thr.h"
@@ -85,6 +88,7 @@ init()
 	/* init fuf */
 	handle_redraw();
 	start_load(load_items, display_load);
+	init_preview(load_preview);
 	signal(SIGWINCH, handle_redraw);
 	signal(SIGCHLD, SIG_IGN);
 }
@@ -92,16 +96,16 @@ init()
 static char
 ch_prompt(char *prefix)
 {
-	WINDOW *prompt = newwin(1, COLS, LINES-1, 1);
+	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
 
 	bool bold = false;
 	char *str = strdup(prefix);
 	char *tok = strtok(str, "[]");
 	while (tok) {
 		if (bold) {
-			wattron(prompt, A_REVERSE | A_BOLD);
+			swattron(prompt, A_REVERSE | A_BOLD);
 			wprintw(prompt, " %s ", tok);
-			wattroff(prompt, A_REVERSE | A_BOLD);
+			swattroff(prompt, A_REVERSE | A_BOLD);
 		} else {
 			waddstr(prompt, tok);
 		}
@@ -111,20 +115,20 @@ ch_prompt(char *prefix)
 	}
 	free(tok);
 	free(str);
-	wrefresh(prompt);
+	swrefresh(prompt);
 
 	char c = getch();
-	delwin(prompt);
+	sdelwin(prompt);
 	return c;
 }
 
 static void
 str_prompt(char *prefix, char *result)
 {
-	WINDOW *prompt = newwin(1, COLS, LINES-1, 1);
-	mvwaddstr(prompt, 0, 0, prefix);
+	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
+	smvwaddstr(prompt, 0, 0, prefix);
 	keypad(prompt, true);
-	wrefresh(prompt);
+	swrefresh(prompt);
 	curs_set(1);
 
 	int c;
@@ -139,7 +143,7 @@ str_prompt(char *prefix, char *result)
 				continue;
 			case 127:
 			case KEY_BACKSPACE:
-				mvwdelch(prompt, 0, (i > 0 ? --i : i)+strlen(prefix));
+				smvwdelch(prompt, 0, (i > 0 ? --i : i)+strlen(prefix));
 				continue;
 			case 10:
 			case KEY_ENTER:
@@ -149,7 +153,7 @@ str_prompt(char *prefix, char *result)
 				break;
 			default:
 				c = tolower(c);
-				waddch(prompt, c);
+				swaddch(prompt, c);
 				result[i++] = c;
 				continue;
 		}
@@ -158,7 +162,7 @@ str_prompt(char *prefix, char *result)
 	}
 
 	curs_set(0);
-	delwin(prompt);
+	sdelwin(prompt);
 }
 
 static void
@@ -253,13 +257,13 @@ open_with(char *launcher, char *file, bool cli)
 static void
 display_load()
 {
-	WINDOW *prompt = newwin(1, COLS, LINES-1, 1);
+	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
 	extern bool items_loading;
 	while (items_loading) {
-		mvwprintw(prompt, 0, 0, "loading: %d", items_len);
-		wrefresh(prompt);
+		smvwprintw(prompt, 0, 0, "loading: %d", items_len);
+		swrefresh(prompt);
 	}
-	delwin(prompt);
+	sdelwin(prompt);
 }
 
 static void
@@ -293,6 +297,9 @@ load_items()
 			items[items_len-1].size = sb.st_size;
 			items[items_len-1].mtime = sb.st_mtime;
 			items[items_len-1].mode = sb.st_mode;
+			items[items_len-1].uid = sb.st_uid;
+			items[items_len-1].gid = sb.st_gid;
+			items[items_len-1].nlink = sb.st_nlink;
 		}
 		closedir(dp);
 		items_loading = false;
@@ -304,33 +311,40 @@ load_items()
 static void
 load_preview()
 {
-	/* gets called once before anything is loaded somehow */
-	if (!items_len) {
-		return;
-	}
-	WINDOW *preview_w = newwin(LINES-2, COLS/2-2, 1, COLS/2+1);
-
 	char file[256];
-	strcpy(file, items[sel_item].name);
-	char preview_cmd[PATH_MAX];
-	sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
- 			preview_path, file, COLS/2-2, LINES-2);
+	prctl(PR_SET_NAME, "preview");
+	extern pthread_cond_t run_preview;
+	extern pthread_mutex_t preview_lock;
+	for (;;) {
+		pthread_mutex_lock(&preview_lock);
+		do {
+			pthread_cond_wait(&run_preview, &preview_lock);
+		} while(!items); /* edgecase, called before items are loaded */
+		pthread_mutex_unlock(&preview_lock);
 
-	int fd;
-	FILE *fp = NULL;
-	int l = 0;
-	char buf[COLS];
-	extern pid_t preview_pid;
-	preview_pid = ext_popen(preview_cmd, &fd);
-	fp = fdopen(fd, "r");
-	while (fgets(buf, COLS, fp)) {
-		mvwaddstr(preview_w, l++, 0, buf);
+		WINDOW *preview_w = snewwin(LINES-2, COLS/2-2, 1, COLS/2+1);
+
+		strcpy(file, items[sel_item].name);
+		char preview_cmd[PATH_MAX];
+		sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
+				preview_path, file, COLS/2-2, LINES-2);
+
+		int fd;
+		FILE *fp = NULL;
+		int l = 0;
+		char buf[COLS];
+		extern pid_t preview_pid;
+		preview_pid = ext_popen(preview_cmd, &fd);
+		fp = fdopen(fd, "r");
+		while (fgets(buf, COLS, fp)) {
+			smvwaddstr(preview_w, l++, 0, buf);
+		}
+		swrefresh(preview_w);
+		sdelwin(preview_w);
+
+		fclose(fp);
+		preview_pid = 0;
 	}
-	wrefresh(preview_w);
-	delwin(preview_w);
-
-	fclose(fp);
-	preview_pid = 0;
 }
 
 static void
@@ -339,13 +353,12 @@ refresh_layout()
 	if (!items) {
 		return;
 	}
-	stop_preview();
-	WINDOW *preview_w = newwin(LINES, COLS/2, 0, COLS/2);
-	WINDOW *dir_w= newwin(LINES, COLS/2, 0, 1);
-	box(preview_w, 0, 0);
-	box(dir_w, 0, 0);
-	mvwaddch(preview_w, 0, 0, ACS_TTEE);
-	mvwaddch(preview_w, LINES-1, 0, ACS_BTEE);
+	WINDOW *preview_w = snewwin(LINES, COLS/2, 0, COLS/2);
+	WINDOW *dir_w= snewwin(LINES, COLS/2, 0, 1);
+	sbox(preview_w, 0, 0);
+	sbox(dir_w, 0, 0);
+	smvwaddch(preview_w, 0, 0, ACS_TTEE);
+	smvwaddch(preview_w, LINES-1, 0, ACS_BTEE);
 
 	/* select previous dir if set */
 	if (strlen(goto_item) > 0) {
@@ -364,70 +377,67 @@ refresh_layout()
 	/* top bar */
 	char cwd[PATH_MAX]; /* left corner */
 	getcwd(cwd, PATH_MAX);
-	mvwaddstr(dir_w, 0, 0, strlen(cwd) > COLS/2 ?
+	smvwaddstr(dir_w, 0, 0, strlen(cwd) > COLS/2 ?
 			cwd + (strlen(cwd)-COLS/2+1)/2*2 : cwd);
 	char index[80];    /* right corner */
 	sprintf(index, "%u/%u", sel_item+1, items_len);
-	mvwaddstr(preview_w, 0, COLS/2-strlen(index), index);
+	smvwaddstr(preview_w, 0, COLS/2-strlen(index), index);
 
 	/* dir contents */
 	for (unsigned i = scroll_pos, y = 1; y < LINES-1 && i < items_len;
 			++i, ++y) {
 		if (i == sel_item) {
-			wattron(dir_w, A_REVERSE); 
+			swattron(dir_w, A_REVERSE); 
 			mvwaddcolitem(dir_w, y, 2, items[i].name, items[i].mode);
-			wattroff(dir_w, A_REVERSE);
+			swattroff(dir_w, A_REVERSE);
 		} else {
 			mvwaddcolitem(dir_w, y, 2, items[i].name, items[i].mode);
 		}
 	}
 
 	/* bottom bar */
-	struct stat sb;
-	if (lstat(items[sel_item].name, &sb)) { /* left corner */
-		wattron(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
-		mvwaddstr(dir_w, LINES-1, 0, "file not found");
-		wattroff(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
-	} else {
-		char fs[69];
-		char *ext = strrchr(items[sel_item].name, '.');
-		ext = ext == items[sel_item].name ? NULL : ext;
-		mvwprintw(dir_w, LINES-1, 0, ext ?
-				"%c%c%c%c%c%c%c%c%c%c %d %s %s %s %s" :
-				"%c%c%c%c%c%c%c%c%c%c %d %s %s %s",
-			S_ISDIR(sb.st_mode) ? 'd' :
-			S_ISLNK(sb.st_mode) ? 'l' : '-',
-			sb.st_mode & S_IRUSR ? 'r' : '-',
-			sb.st_mode & S_IWUSR ? 'w' : '-',
-			sb.st_mode & S_IXUSR && sb.st_mode & S_ISUID ? 's' :
-			sb.st_mode & S_ISUID ? 'S' :
-			sb.st_mode & S_IXUSR ? 'x' : '-',
-			sb.st_mode & S_IRGRP ? 'r' : '-',
-			sb.st_mode & S_IWGRP ? 'w' : '-',
-			sb.st_mode & S_IXGRP && sb.st_mode & S_ISGID ? 's' :
-			sb.st_mode & S_ISGID ? 'S' :
-			sb.st_mode & S_IXGRP ? 'x' : '-',
-			sb.st_mode & S_IROTH ? 'r' : '-',
-			sb.st_mode & S_IWOTH ? 'w' : '-',
-			sb.st_mode & S_IXOTH && sb.st_mode & S_ISVTX ? 't' :
-			sb.st_mode & S_ISVTX ? 'T' :
-			sb.st_mode & S_IXOTH ? 'x' : '-',
-			sb.st_nlink,
-			getpwuid(sb.st_uid) ? getpwuid(sb.st_uid)->pw_name : "???",
-			getgrgid(sb.st_gid) ? getgrgid(sb.st_gid)->gr_name : "???",
-			ext_filesize(sb.st_size, fs), ext);
-		char timedate[80];                  /* right corner */
-		strftime(timedate, 80, "%x %a %H:%M:%S", localtime(&items[sel_item].mtime));
-		mvwaddstr(preview_w, LINES-1, COLS/2-strlen(timedate), timedate);
-	}
+	char fs[69];       /* left corner */
+	char *ext = strrchr(items[sel_item].name, '.');
+	ext = ext == items[sel_item].name ? NULL : ext;
+	smvwprintw(dir_w, LINES-1, 0, ext ?
+			"%c%c%c%c%c%c%c%c%c%c %d %s %s %s %s" :
+			"%c%c%c%c%c%c%c%c%c%c %d %s %s %s",
+		S_ISDIR(items[sel_item].mode) ? 'd' :
+		S_ISLNK(items[sel_item].mode) ? 'l' : '-',
+		items[sel_item].mode & S_IRUSR ? 'r' : '-',
+		items[sel_item].mode & S_IWUSR ? 'w' : '-',
+		items[sel_item].mode & S_IXUSR &&
+		items[sel_item].mode & S_ISUID ? 's' :
+		items[sel_item].mode & S_ISUID ? 'S' :
+		items[sel_item].mode & S_IXUSR ? 'x' : '-',
+		items[sel_item].mode & S_IRGRP ? 'r' : '-',
+		items[sel_item].mode & S_IWGRP ? 'w' : '-',
+		items[sel_item].mode & S_IXGRP &&
+		items[sel_item].mode & S_ISGID ? 's' :
+		items[sel_item].mode & S_ISGID ? 'S' :
+		items[sel_item].mode & S_IXGRP ? 'x' : '-',
+		items[sel_item].mode & S_IROTH ? 'r' : '-',
+		items[sel_item].mode & S_IWOTH ? 'w' : '-',
+		items[sel_item].mode & S_IXOTH &&
+		items[sel_item].mode & S_ISVTX ? 't' :
+		items[sel_item].mode & S_ISVTX ? 'T' :
+		items[sel_item].mode & S_IXOTH ? 'x' : '-',
+		items[sel_item].nlink,
+		getpwuid(items[sel_item].uid) ?
+			getpwuid(items[sel_item].uid)->pw_name : "???",
+		getgrgid(items[sel_item].gid) ?
+			getgrgid(items[sel_item].gid)->gr_name : "???",
+		ext_filesize(items[sel_item].size, fs), ext);
+	char timedate[80]; /* right corner */
+	strftime(timedate, 80, "%x %a %H:%M:%S", localtime(&items[sel_item].mtime));
+	smvwaddstr(preview_w, LINES-1, COLS/2-strlen(timedate), timedate);
 
-	wrefresh(dir_w);
-	wrefresh(preview_w);
-	delwin(dir_w);
-	delwin(preview_w);
-	start_preview(load_preview);
+	swrefresh(dir_w);
+	swrefresh(preview_w);
+	sdelwin(dir_w);
+	sdelwin(preview_w);
+	queue_preview();
 }
-
 static void
 usage()
 {
@@ -488,6 +498,7 @@ main(int argc, char *argv[])
 	char cwd[PATH_MAX];
 	char ch;
 	while((ch = getch()) != 'q') {
+		cancel_preview();
 		stop_load();
 		switch(ch) {
 			case 'j':

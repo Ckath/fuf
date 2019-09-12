@@ -3,7 +3,8 @@
 
 void start_load(void *load_items, void *display_load);
 void stop_load();
-void start_preview(void *load_preview);
-void stop_preview();
+void init_preview(void *load_preview);
+void queue_preview();
+void cancel_preview();
 
 #endif
