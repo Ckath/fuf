@@ -241,9 +241,9 @@ open_with(char *launcher, char *file, bool cli)
 	if (!pid) { /* child: open file */
 		free(items);
 		char cmd[PATH_MAX];
-		sprintf(cmd, cli ? file ? "%s '%s'":"%s":
-				file ? "%s '%s'&>/dev/null":"%s &>/dev/null",
-				launcher, file);
+		sprintf(cmd, cli ? file ? "%s \"%s\"":"%s":
+				file ? "%s \"%s\"&>/dev/null":"%s &>/dev/null",
+				launcher, ext_shesc(file));
 		execl("/bin/bash", "bash", "-c", cmd, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
@@ -329,8 +329,8 @@ load_preview()
 
 		strcpy(file, items[sel_item].name);
 		char preview_cmd[PATH_MAX];
-		sprintf(preview_cmd, "%s '%s' %d %d 2>&1",
-				preview_path, file, COLS/2-2, LINES-2);
+		sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
+				preview_path, ext_shesc(file), COLS/2-2, LINES-2);
 
 		int fd;
 		FILE *fp = NULL;
