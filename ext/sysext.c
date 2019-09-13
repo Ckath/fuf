@@ -3,12 +3,14 @@
  * ext_kill: kills process and all child processes
  * ext_popen: popen clone that returns pid of process
  * ext_chldname: get name of youngest child process 
- * ext_filesize: human readable filesize */
+ * ext_filesize: human readable filesize
+ * ext_shesc: questionable escaping for strings passed to the shell */
 
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "sysext.h"
 
@@ -97,4 +99,20 @@ ext_filesize(long size, char *humanfs)
 	}
 	sprintf(humanfs, i ? "%.*f%c":"%.*f", i, fs, units[i-1]);
 	return humanfs;
+}
+
+char *
+ext_shesc(char *s)
+{
+	char tmp[256];
+	strcpy(tmp, s);
+	int i = 0, offset = 0;
+	for (; tmp[i]; ++i) {
+		if (tmp[i] == '`' || tmp[i] == '"') {
+			s[i+offset++] = '\\';
+		} 
+		s[i+offset] = tmp[i];
+	}
+	s[i+1] = '\0';
+	return s;
 }
