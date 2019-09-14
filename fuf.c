@@ -242,7 +242,7 @@ open_with(char *launcher, char *file, bool cli)
 		free(items);
 		char cmd[PATH_MAX];
 		sprintf(cmd, cli ? file ? "%s \"%s\"":"%s":
-				file ? "%s \"%s\"&>/dev/null":"%s &>/dev/null",
+				file ? "%s \"%s\" &>/dev/null":"%s &>/dev/null",
 				launcher, ext_shesc(file));
 		execl("/bin/bash", "bash", "-c", cmd, NULL);
 		_exit(1);

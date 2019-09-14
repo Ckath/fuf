@@ -104,6 +104,10 @@ ext_filesize(long size, char *humanfs)
 char *
 ext_shesc(char *s)
 {
+	if (!s) {
+		return s;
+	}
+
 	char tmp[256];
 	strcpy(tmp, s);
 	int i = 0, offset = 0;
