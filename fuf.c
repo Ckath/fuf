@@ -356,6 +356,7 @@ refresh_layout()
 	if (!items) {
 		return;
 	}
+	WINDOW *cwd_w;
 	WINDOW *preview_w = snewwin(LINES, COLS/2, 0, COLS/2);
 	WINDOW *dir_w= snewwin(LINES, COLS/2, 0, 1);
 	sbox(preview_w, 0, 0);
@@ -378,19 +379,22 @@ refresh_layout()
 		? sel_item : scroll_pos;
 	
 	/* top bar */
+	char index[80];    /* right corner */
+	sprintf(index, "%u/%u", sel_item+1, items_len);
+	smvwaddstr(preview_w, 0, COLS/2-strlen(index), index);
+
 	char cwd[PATH_MAX]; /* left corner */
 	bool cwdok = getcwd(cwd, PATH_MAX);
 	if (cwdok) {
-		smvwaddstr(dir_w, 0, 0, strlen(cwd) > COLS/2 ?
-				cwd + (strlen(cwd)-COLS/2+1)/2*2 : cwd);
+		cwd_w = snewwin(1, strlen(cwd) < COLS-strlen(index)-1 ? 
+				strlen(cwd) : COLS-strlen(index)-1, 0, 1); 
+		smvwaddstr(cwd_w, 0, 0, strlen(cwd) < COLS-strlen(index)-1 ?
+				cwd : cwd + (strlen(cwd)-COLS+strlen(index)+1));
 	} else {
 		swattron(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 		smvwaddstr(dir_w, 0, 0, "dir not found");
 		swattroff(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 	}
-	char index[80];    /* right corner */
-	sprintf(index, "%u/%u", sel_item+1, items_len);
-	smvwaddstr(preview_w, 0, COLS/2-strlen(index), index);
 
 	/* dir contents */
 	for (unsigned i = scroll_pos, y = 1; y < LINES-1 && i < items_len;
@@ -446,6 +450,8 @@ refresh_layout()
 	sdelwin(dir_w);
 	sdelwin(preview_w);
 	if (cwdok) {
+		swrefresh(cwd_w);
+		sdelwin(cwd_w);
 		queue_preview();
 	}
 }
