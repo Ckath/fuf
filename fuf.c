@@ -237,13 +237,14 @@ open_with(char *launcher, char *file, bool cli)
 	/* reset sigchld handler, might want to wait */
 	signal(SIGCHLD, SIG_DFL);
 
+	ext_shesc(file);
 	pid_t pid = fork();
 	if (!pid) { /* child: open file */
 		free(items);
 		char cmd[PATH_MAX];
 		sprintf(cmd, cli ? file ? "%s \"%s\"":"%s":
 				file ? "%s \"%s\" &>/dev/null":"%s &>/dev/null",
-				launcher, ext_shesc(file));
+				launcher, file);
 		execl("/bin/bash", "bash", "-c", cmd, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
