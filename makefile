@@ -1,5 +1,5 @@
 NAME = fuf
-VERSION = 0.1
+VERSION = "$(shell git describe --tag)"
 CFLAGS = 
 LIBS = -lncurses -lpthread
 SRC = ${NAME}.c ext/colors.c ext/sort.c ext/thr.c ext/sysext.c ext/sncurses.c
