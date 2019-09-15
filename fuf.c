@@ -386,10 +386,10 @@ refresh_layout()
 	char cwd[PATH_MAX]; /* left corner */
 	bool cwdok = getcwd(cwd, PATH_MAX);
 	if (cwdok) {
-		cwd_w = snewwin(1, strlen(cwd) < COLS-strlen(index)-1 ? 
-				strlen(cwd) : COLS-strlen(index)-1, 0, 1); 
-		smvwaddstr(cwd_w, 0, 0, strlen(cwd) < COLS-strlen(index)-1 ?
-				cwd : cwd + (strlen(cwd)-COLS+strlen(index)+1));
+		cwd_w = snewwin(1, strlen(cwd) < COLS-strlen(index)-3 ?
+				strlen(cwd) : COLS-strlen(index)-3, 0, 1);
+		smvwaddstr(cwd_w, 0, 0, strlen(cwd) < COLS-strlen(index)-3 ?
+				cwd : cwd + (strlen(cwd)-COLS+strlen(index)+3));
 	} else {
 		swattron(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 		smvwaddstr(dir_w, 0, 0, "dir not found");
