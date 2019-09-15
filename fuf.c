@@ -385,10 +385,10 @@ refresh_layout()
 	smvwaddstr(preview_w, 0, COLS/2-strlen(index), index);
 
 	char cwd[PATH_MAX]; /* left corner */
-	wchar_t wcwd[PATH_MAX];
 	bool cwdok = getcwd(cwd, PATH_MAX);
-	swprintf(wcwd, PATH_MAX, L"%hs", cwd);
 	if (cwdok) {
+		wchar_t wcwd[PATH_MAX];
+		swprintf(wcwd, PATH_MAX, L"%hs", cwd);
 		int cwd_len = strlen(cwd) > wcslen(wcwd) ?
 			strlen(cwd)-(strlen(cwd)-wcslen(wcwd))/2 :
 			strlen(cwd);
