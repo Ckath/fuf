@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -22,7 +23,6 @@
 #include "ext/thr.h"
 #include "item.h"
 
-#define CTRL(c) (c&0x1f)
 #define CLI_PROGRAMS "vi nvim nano dhex man w3m elinks links2 links lynx"
 
 static void handle_redraw();  /* utility */
@@ -325,12 +325,18 @@ load_preview()
 		} while(!items); /* edgecase, called before items are loaded */
 		pthread_mutex_unlock(&preview_lock);
 
+		strcpy(file, items[sel_item].name);
 		WINDOW *preview_w = snewwin(LINES-2, COLS/2-2, 1, COLS/2+1);
 
-		strcpy(file, items[sel_item].name);
+		struct winsize w;
+		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		char preview_cmd[PATH_MAX];
-		sprintf(preview_cmd, "%s \"%s\" %d %d 2>&1",
-				preview_path, ext_shesc(file), COLS/2-2, LINES-2);
+		int col_px = w.ws_xpixel/COLS;
+		int line_px = w.ws_ypixel/LINES;
+		sprintf(preview_cmd, "%s \"%s\" %d %d %d %d %d %d 2>&1",
+				preview_path, ext_shesc(file), COLS/2-2, LINES-2,
+				col_px*(COLS/2-3), line_px*(LINES-2), /* preview img size */
+				col_px*(COLS/2+1), line_px);          /* preview img pos */
 
 		int fd;
 		FILE *fp = NULL;
