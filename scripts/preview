@@ -17,7 +17,7 @@ cached="$(echo ~)/.thumbnails/$path" # location used to cache image previews
 # preview img position finetuning, this differs slightly with terminal/font
 # you might have to tweak this
 offset_w=0
-offset_h=-1
+offset_h=0
 
 # fileinfo
 mimetype=$(file --mime-type -Lb "$path")
