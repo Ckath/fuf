@@ -371,7 +371,7 @@ refresh_layout()
 	smvwaddch(preview_w, LINES-1, 0, ACS_BTEE);
 
 	/* select previous dir if set */
-	if (strlen(goto_item) > 0) {
+	if (items_len && strlen(goto_item) > 0) {
 		unsigned prev_pos = 0;
 		while (sel_item != ++prev_pos%items_len &&
 				strcmp(goto_item, items[prev_pos].name));
