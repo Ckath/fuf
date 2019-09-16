@@ -16,6 +16,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+#include <wchar.h>
 #include "ext/colors.h"
 #include "ext/sncurses.h"
 #include "ext/sort.h"
@@ -392,10 +393,15 @@ refresh_layout()
 	char cwd[PATH_MAX]; /* left corner */
 	bool cwdok = getcwd(cwd, PATH_MAX);
 	if (cwdok) {
-		cwd_w = snewwin(1, strlen(cwd) < COLS-strlen(index)-1 ? 
-				strlen(cwd) : COLS-strlen(index)-1, 0, 1); 
-		smvwaddstr(cwd_w, 0, 0, strlen(cwd) < COLS-strlen(index)-1 ?
-				cwd : cwd + (strlen(cwd)-COLS+strlen(index)+1));
+		wchar_t wcwd[PATH_MAX];
+		swprintf(wcwd, PATH_MAX, L"%hs", cwd);
+		int cwd_len = strlen(cwd) > wcslen(wcwd) ?
+			strlen(cwd)-(strlen(cwd)-wcslen(wcwd))/2 :
+			strlen(cwd);
+		cwd_w = snewwin(1, cwd_len < COLS-strlen(index)-3 ?
+				cwd_len : COLS-strlen(index)-3, 0, 1);
+		smvwaddstr(cwd_w, 0, 0, cwd_len < COLS-strlen(index)-3 ?
+				cwd : cwd + (cwd_len-COLS+strlen(index)+3));
 	} else {
 		swattron(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 		smvwaddstr(dir_w, 0, 0, "dir not found");
