@@ -32,7 +32,7 @@ install either [fuf](https://aur.archlinux.org/packages/fuf) or [fuf-git](https:
 #### manual
 `sudo make install`\
 \* ncurses, pthreads and a linux** system are required to compile fuf\
-\*\* only ever tested on arch
+\** only ever tested on arch
 ### uninstall
 `sudo make uninstall`
 ### configuration
@@ -43,7 +43,9 @@ grab the default scripts and move them to local copies, you can also choose syml
 - preview showing `no preview configured`\
 you are lacking a program used to generate previews, change it in the script or install them
 - image previews not working\
-w3m is used to display the (generated) images, make sure your terminal supports this
+w3mimgdisplay is used to display the (generated) images, make sure your terminal supports this. even then its hacky at best
+- image previews misaligning\
+due to the nature of w3mimgdisplay this will differ ever so slightly per terminal/font, offsets `offset_h` and `offset_w` are available in the preview script to fix this
 - some file is not opening with fuf\
 either the open script isn't setup to open this filetype or you dont have any of the programs associated with the filetype installed. install the programs or edit/replace the open handler
 - the directory sizes are wrong\
@@ -56,8 +58,8 @@ this will never be added, it annoys me
 these are whitelisted in fuf in the `CLI_PROGRAMS` definition in fuf.c, make a pr or issue for one to be added
 - issues related to scripts remain after update that should fix them\
 since fuf allows you use your own versions of the scripts in ~/.config/fuf its up to yourself to keep up with patching these with the latest changes from the /usr/lib/fuf supplied ones.
-- doesn't compile/work under *some architecture/distro/os*\
-fuf was 100% made for and on arch, if it works elsewhere neat but that was never a goal
+- doesn't compile/work under *some architecture/distro/os/terminal emulator*\
+fuf was 100% made for and on urxvt in arch, if it works elsewhere neat but that was never a goal
 
 ## inspirations
 - [ranger](https://github.com/ranger/ranger): the cli fm that annoyed me to the point of writing my own
