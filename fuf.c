@@ -422,6 +422,7 @@ refresh_layout()
 
 	/* bottom bar */
 	char fs[69];       /* left corner */
+	char id[69];
 	char *ext = strrchr(items[sel_item].name, '.');
 	ext = ext == items[sel_item].name ? NULL : ext;
 	smvwprintw(dir_w, LINES-1, 0, ext ?
@@ -449,9 +450,11 @@ refresh_layout()
 		items[sel_item].mode & S_IXOTH ? 'x' : '-',
 		items[sel_item].nlink,
 		getpwuid(items[sel_item].uid) ?
-			getpwuid(items[sel_item].uid)->pw_name : "???",
+			getpwuid(items[sel_item].uid)->pw_name :
+			ext_itoa(items[sel_item].uid, id),
 		getgrgid(items[sel_item].gid) ?
-			getgrgid(items[sel_item].gid)->gr_name : "???",
+			getgrgid(items[sel_item].gid)->gr_name :
+			ext_itoa(items[sel_item].gid, id),
 		ext_filesize(items[sel_item].size, fs), ext);
 	char timedate[80]; /* right corner */
 	strftime(timedate, 80, "%x %a %H:%M:%S", localtime(&items[sel_item].mtime));

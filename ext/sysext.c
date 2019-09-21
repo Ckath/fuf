@@ -4,7 +4,8 @@
  * ext_popen: popen clone that returns pid of process
  * ext_chldname: get name of youngest child process 
  * ext_filesize: human readable filesize
- * ext_shesc: questionable escaping for strings passed to the shell */
+ * ext_shesc: questionable escaping for strings passed to the shell
+ * ext_itoa: itoa equivalent that reuses input buffer */
 
 #include <signal.h>
 #include <stdbool.h>
@@ -13,6 +14,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "sysext.h"
+unsigned s_idpos;
 
 void
 ext_kill(pid_t pid, int sig)
@@ -119,4 +121,14 @@ ext_shesc(char *s)
 	}
 	s[i+1] = '\0';
 	return s;
+}
+
+char *
+ext_itoa(int i, char *s)
+{
+	s_idpos = s[0] ? s_idpos : 0;
+	char *o = s+s_idpos;
+	sprintf(o, "%d", i);
+	s_idpos += strlen(o)+1;
+	return o;
 }
