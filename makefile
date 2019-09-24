@@ -1,17 +1,17 @@
 NAME = fuf
 VERSION = "$(shell git describe --tag)"
-CFLAGS = 
+CFLAGS =
 LIBS = -lncurses -lpthread
 SRC = ${NAME}.c ext/colors.c ext/sort.c ext/thr.c ext/sysext.c ext/sncurses.c
 OBJ = ${SRC:.c=.o}
 DESTDIR = /usr
 CC = gcc
 
-.c.o: 
+.c.o:
 	@echo CC -c ${CFLAGS} $<
 	@${CC} -c ${CFLAGS} -DVERSION=\"${VERSION}\" $< ${LIBS} -o ${<:.c=.o}
 
-${NAME}: ${SRC} ${OBJ} 
+${NAME}: ${SRC} ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${CFLAGS} ${OBJ} ${LIBS}
 

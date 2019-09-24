@@ -95,7 +95,7 @@ find_lsattrs(const char *key)
 
 	/* find key in LS_COLORS store */
 	char key_match[256];
-	sprintf(key_match, key[0] == '.' ?  "*%s=":"%s=", key); 
+	sprintf(key_match, key[0] == '.' ?  "*%s=":"%s=", key);
 	while (strncmp(k, key_match, strlen(key_match))) {
 		k = strchr(k, ':')+1;
 		if (!strlen(k)) {

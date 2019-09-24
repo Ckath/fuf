@@ -97,7 +97,7 @@ smvwaddstr(WINDOW *win, int y, int x, const char *str)
 	return r;
 }
 
-int 
+int
 smvwprintw(WINDOW *win, int y, int x, const char *fmt, ...)
 {
 	char buf[999];

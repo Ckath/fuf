@@ -2,7 +2,7 @@
  * extended system functions
  * ext_kill: kills process and all child processes
  * ext_popen: popen clone that returns pid of process
- * ext_chldname: get name of youngest child process 
+ * ext_chldname: get name of youngest child process
  * ext_filesize: human readable filesize
  * ext_shesc: questionable escaping for strings passed to the shell
  * ext_itoa: itoa equivalent that reuses input buffer */
@@ -39,13 +39,13 @@ ext_kill(pid_t pid, int sig)
 pid_t
 ext_popen(const char *command, int *fd)
 {
-    int p_stdout[2];
-    pid_t pid;
+	int p_stdout[2];
+	pid_t pid;
 
-    if (pipe(p_stdout) != 0) {
-        return -1;
+	if (pipe(p_stdout) != 0) {
+		return -1;
 	} if ((pid = fork()) < 0) {
-        return pid;
+		return pid;
 	} else if (pid == 0) {
 		dup2(p_stdout[1], STDOUT_FILENO);
 		close(p_stdout[0]);
@@ -56,9 +56,9 @@ ext_popen(const char *command, int *fd)
 		exit(1);
 	}
 
-    close(p_stdout[1]);
+	close(p_stdout[1]);
 	*fd = p_stdout[0];
-    return pid;
+	return pid;
 }
 
 char *
@@ -116,7 +116,7 @@ ext_shesc(char *s)
 	for (; tmp[i]; ++i) {
 		if (tmp[i] == '`' || tmp[i] == '"') {
 			s[i+offset++] = '\\';
-		} 
+		}
 		s[i+offset] = tmp[i];
 	}
 	s[i+1] = '\0';

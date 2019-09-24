@@ -6,7 +6,7 @@
 #include "sort.h"
 #include "../item.h"
 
-int 
+int
 size_cmp(const void *a, const void *b)
 {
 	item *item_a = (item *)a;
@@ -22,7 +22,7 @@ size_cmp(const void *a, const void *b)
 	return ((item *)b)->size - ((item *)a)->size;
 }
 
-int 
+int
 Size_cmp(const void *a, const void *b)
 {
 	item *item_a = (item *)a;
@@ -38,7 +38,7 @@ Size_cmp(const void *a, const void *b)
 	return ((item *)a)->size - ((item *)b)->size;
 }
 
-int 
+int
 alpha_cmp(const void *a, const void *b)
 {
 	item *item_a = (item *)a;
@@ -65,7 +65,7 @@ alpha_cmp(const void *a, const void *b)
 	}
 }
 
-int 
+int
 Alpha_cmp(const void *a, const void *b)
 {
 	item *item_a = (item *)a;
@@ -108,7 +108,7 @@ time_cmp(const void *a, const void *b)
 	return ((item *)b)->mtime - ((item *)a)->mtime;
 }
 
-int 
+int
 Time_cmp(const void *a, const void *b)
 {
 	item *item_a = (item *)a;

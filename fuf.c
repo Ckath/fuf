@@ -56,8 +56,8 @@ handle_redraw()
 	srefresh();
 
 	/* keep the file list within resized window */
-	scroll_pos = items_len-1 > scroll_pos-LINES+2 
-		? items_len-1-LINES+2 : items_len-scroll_pos < LINES+2 
+	scroll_pos = items_len-1 > scroll_pos-LINES+2
+		? items_len-1-LINES+2 : items_len-scroll_pos < LINES+2
 		? 0 : scroll_pos;
 
 	extern bool items_loading;
@@ -274,7 +274,7 @@ static void
 load_items()
 {
 	DIR *dp;
-	struct dirent *ep;     
+	struct dirent *ep;
 
 	sel_item = 0;
 	items_len = 0;
@@ -283,9 +283,9 @@ load_items()
 		extern bool items_loading;
 		while ((ep = readdir(dp)) && items_loading) {
 			/* get rid of . and .. */
-			if (ep->d_name[0] == '.' && 
-					(ep->d_name[1] == '\0' || 
-					 (ep->d_name[1] == '.' && ep->d_name[2] == '\0'))) {
+			if (ep->d_name[0] == '.' &&
+					(ep->d_name[1] == '\0' ||
+					(ep->d_name[1] == '.' && ep->d_name[2] == '\0'))) {
 					continue;
 			}
 
@@ -379,12 +379,12 @@ refresh_layout()
 		sel_item = prev_pos%items_len;
 		strcpy(goto_item, "");
 	}
-	
+
 	/* scroll to out of bounds sel_item */
-	scroll_pos = sel_item > scroll_pos+LINES-3 
+	scroll_pos = sel_item > scroll_pos+LINES-3
 		? sel_item-LINES+3 : sel_item < scroll_pos
 		? sel_item : scroll_pos;
-	
+
 	/* top bar */
 	char index[80];    /* right corner */
 	sprintf(index, "%u/%u", sel_item+1, items_len);
@@ -412,7 +412,7 @@ refresh_layout()
 	for (unsigned i = scroll_pos, y = 1; y < LINES-1 && i < items_len;
 			++i, ++y) {
 		if (i == sel_item) {
-			swattron(dir_w, A_REVERSE); 
+			swattron(dir_w, A_REVERSE);
 			mvwaddcolitem(dir_w, y, 2, items[i].name, items[i].mode);
 			swattroff(dir_w, A_REVERSE);
 		} else {
@@ -647,7 +647,7 @@ main(int argc, char *argv[])
 						items_len-1 - LINES+3 - scroll_pos : 0;
 					scroll_pos = items_len-1 > LINES-3 ?
 						items_len-1 - LINES+3 : 0;
-						
+
 				}
 				refresh_layout();
 				break;
