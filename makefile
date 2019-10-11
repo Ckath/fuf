@@ -34,5 +34,5 @@ uninstall: ${NAME}
 	@rm -f ${DESTDIR}/bin/${NAME}
 	@echo removing scripts
 	@rm -rf ${DESTDIR}/lib/${NAME}
-	@rm ${DESTDIR}/share/zsh/site-funcitons/_${NAME}
-	@rm ${DESTDIR}/share/bash/bash-completions/completions/${NAME}
+	@rm ${DESTDIR}/share/zsh/site-functions/_${NAME}
+	@rm ${DESTDIR}/share/bash-completion/completions/${NAME}
