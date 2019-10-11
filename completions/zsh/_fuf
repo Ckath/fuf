@@ -1,0 +1,18 @@
+#compdef fuf
+#
+# Completion definition for fuf.
+
+setopt localoptions noshwordsplit noksharrays
+local -a args
+args=(
+    '(-a)-a[sort alphabetical, this is default]'
+    '(-A)-A[sort alphabetical, reversed]'
+    '(-s)-s[sort by size]'
+    '(-S)-S[sort by size, reversed]'
+    '(-t)-t[sort by time]'
+    '(-T)-T[sort by time, reversed]'
+    '(-v)-v[version info]'
+    '(-h)-h[usage info]'
+    '*:filename:_files'
+)
+_arguments -S -s $args
