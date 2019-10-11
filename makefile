@@ -27,9 +27,10 @@ install: ${NAME}
 	@echo installing scripts
 	@mkdir -p ${DESTDIR}/lib/${NAME}
 	@cp -f scripts/* ${DESTDIR}/lib/${NAME}
-	@cp -f _${NAME} ${DESTDIR}/share/zsh/site-functions/
+	@cp -f completions/zsh/_${NAME} ${DESTDIR}/share/zsh/site-functions/
 uninstall: ${NAME}
 	@echo removing executable file from ${DESTDIR}/bin
 	@rm -f ${DESTDIR}/bin/${NAME}
 	@echo removing scripts
 	@rm -rf ${DESTDIR}/lib/${NAME}
+	@rm ${DESTDIR}/share/zsh/site-funcitons/_${NAME}
