@@ -2,7 +2,7 @@ NAME = fuf
 VERSION = "$(shell git describe --tag)"
 CFLAGS =
 LIBS = -lncurses -lpthread
-SRC = ${NAME}.c ext/colors.c ext/sort.c ext/thr.c ext/sysext.c ext/sncurses.c
+SRC = ${NAME}.c inc/colors.c inc/sort.c inc/thr.c inc/sysext.c inc/sncurses.c
 OBJ = ${SRC:.c=.o}
 DESTDIR = /usr
 CC = gcc

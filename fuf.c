@@ -17,12 +17,12 @@
 #include <time.h>
 #include <unistd.h>
 #include <wchar.h>
-#include "ext/colors.h"
-#include "ext/sncurses.h"
-#include "ext/sort.h"
-#include "ext/sysext.h"
-#include "ext/thr.h"
-#include "item.h"
+#include "inc/colors.h"
+#include "inc/sncurses.h"
+#include "inc/sort.h"
+#include "inc/sysext.h"
+#include "inc/thr.h"
+#include "inc/item.h"
 
 #define CLI_PROGRAMS "vi nvim nano dhex man w3m elinks links2 links lynx"
 

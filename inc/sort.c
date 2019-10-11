@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "sort.h"
-#include "../item.h"
+#include "item.h"
 
 int
 size_cmp(const void *a, const void *b)
