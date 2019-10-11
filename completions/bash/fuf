@@ -1,0 +1,1 @@
+complete -W "-a -A -s -S -t -T -v -h" -o dirnames fuf
