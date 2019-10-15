@@ -1,6 +1,6 @@
 # fuf
 Fairly Usable Filebrowser
-[![videodemo](https://xn--z7x.xn--6frz82g/files/fuf_demo.png)](https://streamable.com/iur7v)
+[![videodemo](https://xn--z7x.xn--6frz82g/files/fuf_demo.png)](https://streamable.com/qj3fz)
 
 another cli filebrowser made just for myself with the following ideas:
 - async loading of directories and previews that you can cancel
