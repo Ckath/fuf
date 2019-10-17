@@ -349,7 +349,9 @@ load_preview()
 		while (fgets(buf, COLS, fp)) {
 			smvwaddstr(preview_w, l++, 0, buf);
 		}
-		swrefresh(preview_w);
+		if (l > 0 && buf[0] != '\n') { /* guess this was not an image */
+			swrefresh(preview_w);
+		}
 		sdelwin(preview_w);
 
 		fclose(fp);
