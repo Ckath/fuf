@@ -26,9 +26,11 @@ start_load(void *load_items, void *display_load)
 void
 stop_load()
 {
-	items_loading = false;
-	pthread_join(load_thr, NULL);
-	pthread_join(display_thr, NULL);
+	if (items_loading) {
+		items_loading = false;
+		pthread_join(load_thr, NULL);
+		pthread_join(display_thr, NULL);
+	}
 }
 
 void
