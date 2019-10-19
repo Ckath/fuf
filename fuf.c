@@ -62,6 +62,7 @@ handle_redraw()
 
 	extern bool items_loading;
 	if (!items_loading) {
+		cancel_preview();
 		refresh_layout();
 	}
 }
