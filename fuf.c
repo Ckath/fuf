@@ -317,13 +317,18 @@ static void
 load_preview()
 {
 	char file[256];
-	prctl(PR_SET_NAME, "preview");
+	extern bool pn;
+	prctl(PR_SET_NAME, pn++ ? "preview0" : "preview1");
 	extern pthread_cond_t run_preview;
 	extern pthread_mutex_t preview_lock;
+	extern pthread_mutex_t preview_pid_lock;
+	extern pid_t preview_pid;
 	for (;;) {
+		pthread_mutex_lock(&preview_lock);
 		do {
 			pthread_cond_wait(&run_preview, &preview_lock);
 		} while(!items); /* edgecase, called before items are loaded */
+		pthread_mutex_unlock(&preview_lock);
 
 		strcpy(file, items[sel_item].name);
 		WINDOW *preview_w = snewwin(LINES-2, COLS/2-2, 1, COLS/2+1);
@@ -338,13 +343,15 @@ load_preview()
 				col_px*(COLS/2-3), line_px*(LINES-2), /* preview img size */
 				col_px*(COLS/2+1), line_px);          /* preview img pos */
 
+
 		int fd;
-		FILE *fp = NULL;
+		pthread_mutex_lock(&preview_pid_lock);
+		preview_pid = ext_popen(preview_cmd, &fd);
+		pthread_mutex_unlock(&preview_pid_lock);
+
 		int l = 0;
 		char buf[COLS];
-		extern pid_t preview_pid;
-		preview_pid = ext_popen(preview_cmd, &fd);
-		fp = fdopen(fd, "r");
+		FILE *fp = fdopen(fd, "r");
 		while (fgets(buf, COLS, fp)) {
 			smvwaddstr(preview_w, l++, 0, buf);
 		}
@@ -354,7 +361,10 @@ load_preview()
 		sdelwin(preview_w);
 
 		fclose(fp);
+
+		pthread_mutex_lock(&preview_pid_lock);
 		preview_pid = 0;
+		pthread_mutex_unlock(&preview_pid_lock);
 	}
 }
 
