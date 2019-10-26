@@ -197,6 +197,7 @@ search_next(bool reverse)
 static void
 open_file()
 {
+	cancel_preview();
 	/* reset sigchld handler, might want to wait */
 	signal(SIGCHLD, SIG_DFL);
 
@@ -318,11 +319,12 @@ load_preview()
 {
 	char file[256];
 	extern bool pn;
-	prctl(PR_SET_NAME, pn++ ? "preview0" : "preview1");
+	char nthr = pn++;
+	prctl(PR_SET_NAME, nthr ? "preview0" : "preview1");
 	extern pthread_cond_t run_preview;
 	extern pthread_mutex_t preview_lock;
 	extern pthread_mutex_t preview_pid_lock;
-	extern pid_t preview_pid;
+	extern pid_t preview_pid[2];
 	for (;;) {
 		pthread_mutex_lock(&preview_lock);
 		do {
@@ -346,7 +348,7 @@ load_preview()
 
 		int fd;
 		pthread_mutex_lock(&preview_pid_lock);
-		preview_pid = ext_popen(preview_cmd, &fd);
+		preview_pid[nthr] = ext_popen(preview_cmd, &fd);
 		pthread_mutex_unlock(&preview_pid_lock);
 
 		int l = 0;
@@ -363,7 +365,7 @@ load_preview()
 		fclose(fp);
 
 		pthread_mutex_lock(&preview_pid_lock);
-		preview_pid = 0;
+		preview_pid[nthr] = 0;
 		pthread_mutex_unlock(&preview_pid_lock);
 	}
 }

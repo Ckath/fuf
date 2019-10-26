@@ -14,7 +14,7 @@ pthread_t preview_backup_thr;
 pthread_cond_t run_preview = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t preview_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t preview_pid_lock = PTHREAD_MUTEX_INITIALIZER;
-pid_t preview_pid = 0;
+pid_t preview_pid[2];
 bool items_loading = false;
 bool pn = false;
 
@@ -55,8 +55,10 @@ void
 cancel_preview()
 {
 	pthread_mutex_lock(&preview_pid_lock);
-	if (preview_pid) {
-		ext_kill(preview_pid, SIGKILL);
+	if (preview_pid[0]) {
+		ext_kill(preview_pid[0], SIGKILL);
+	} if (preview_pid[1]) {
+		ext_kill(preview_pid[1], SIGKILL);
 	}
 	pthread_mutex_unlock(&preview_pid_lock);
 }
