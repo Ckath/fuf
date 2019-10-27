@@ -208,7 +208,7 @@ open_file()
 		_exit(1);
 	} else { /* parent: check launched process */
 		char proc_name[256];
-		usleep(500000); /* 500ms, time open handler has to start program */
+		sleep(1); /* 1s, time open handler has to start program */
 
 		if (ext_chldname(pid, proc_name)) { /* a program was launched by open handler */
 			/* check if its a cli program fuf should wait for */
