@@ -27,6 +27,7 @@
 #define CLI_PROGRAMS "vi nvim nano dhex man w3m elinks links2 links lynx"
 
 static void handle_redraw();  /* utility */
+static void handle_chld();
 static void init();
 static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
@@ -48,6 +49,12 @@ char search[256];
 char goto_item[256];
 char open_path[PATH_MAX];
 char preview_path[PATH_MAX];
+
+static void
+handle_chld()
+{
+	while (waitpid((pid_t)(-1), 0, WNOHANG) > 0); 
+}
 
 static void
 handle_redraw()
@@ -95,7 +102,7 @@ init()
 	start_load(load_items, display_load);
 	init_preview(load_preview);
 	signal(SIGWINCH, handle_redraw);
-	signal(SIGCHLD, SIG_IGN);
+	signal(SIGCHLD, handle_chld);
 }
 
 static char
@@ -226,7 +233,6 @@ open_file()
 		}
 
 		handle_redraw(); /* redraw since its probably fucked */
-		signal(SIGCHLD, SIG_IGN); /* ignore sigchld again */
 	}
 }
 
