@@ -7,5 +7,6 @@ char *ext_chldname(pid_t pid, char *name);
 char *ext_filesize(long size, char *humanfs);
 char *ext_shesc(char *s);
 char *ext_itoa(int i, char *s);
+void ext_waitpid(pid_t pid);
 
 #endif

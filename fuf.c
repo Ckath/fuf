@@ -197,9 +197,8 @@ search_next(bool reverse)
 static void
 open_file()
 {
+	/* ensure no previews are loading */
 	cancel_preview();
-	/* reset sigchld handler, might want to wait */
-	signal(SIGCHLD, SIG_DFL);
 
 	pid_t pid = fork();
 	if (!pid) { /* child: open file in program though open handler */
@@ -219,27 +218,21 @@ open_file()
 			char *program = strtok(programs, " ");
 			while(program) {
 				if (!strncmp(proc_name, program, strlen(program))) {
-					while(wait(NULL) != pid);
-					handle_redraw(); /* redraw since its probably fucked */
+					ext_waitpid(pid);
 					break;
 				}
 				program = strtok(NULL, " ");
 			}
-		} else { /* edge case: open handler didnt launch anything */
-			while(wait(NULL) != pid);
 		}
 
-		/* ignore sigchld, no zombies allowed */
-		signal(SIGCHLD, SIG_IGN);
+		handle_redraw(); /* redraw since its probably fucked */
+		signal(SIGCHLD, SIG_IGN); /* ignore sigchld again */
 	}
 }
 
 static void
 open_with(char *launcher, char *file, bool cli)
 {
-	/* reset sigchld handler, might want to wait */
-	signal(SIGCHLD, SIG_DFL);
-
 	pid_t pid = fork();
 	if (!pid) { /* child: open file */
 		char cmd[PATH_MAX];
@@ -251,12 +244,9 @@ open_with(char *launcher, char *file, bool cli)
 		_exit(1);
 	} else { /* parent: check launched process */
 		if (cli) {
-			while(wait(NULL) != pid);
+			ext_waitpid(pid);
 			handle_redraw(); /* redraw since its probably fucked */
 		}
-
-		/* ignore sigchld, no zombies allowed */
-		signal(SIGCHLD, SIG_IGN);
 	}
 }
 
