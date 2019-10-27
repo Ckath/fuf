@@ -251,9 +251,10 @@ open_with(char *launcher, char *file, bool cli)
 	} else { /* parent: check launched process */
 		if (cli) {
 			ext_waitpid(pid);
-			handle_redraw(); /* redraw since its probably fucked */
 		}
 	}
+
+	handle_redraw(); /* redraw since its probably fucked */
 }
 
 static void
