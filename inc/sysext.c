@@ -5,7 +5,8 @@
  * ext_chldname: get name of youngest child process
  * ext_filesize: human readable filesize
  * ext_shesc: questionable escaping for strings passed to the shell
- * ext_itoa: itoa equivalent that reuses input buffer */
+ * ext_itoa: itoa equivalent that reuses input buffer
+ * ext_waitpid: wait until pid exists, regardless if its a child */
 
 #include <signal.h>
 #include <stdbool.h>
@@ -13,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "sysext.h"
 unsigned s_idpos;
 
@@ -131,4 +133,15 @@ ext_itoa(int i, char *s)
 	sprintf(o, "%d", i);
 	s_idpos += strlen(o)+1;
 	return o;
+}
+
+void
+ext_waitpid(pid_t pid)
+{
+	struct stat sb;
+	char proc_pid[256];
+	sprintf(proc_pid, "/proc/%d", pid);
+	while(stat(proc_pid, &sb) == 0) {
+		usleep(10000);
+	}
 }

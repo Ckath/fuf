@@ -27,6 +27,7 @@
 #define CLI_PROGRAMS "vi nvim nano dhex man w3m elinks links2 links lynx"
 
 static void handle_redraw();  /* utility */
+static void handle_chld();
 static void init();
 static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
@@ -50,6 +51,12 @@ char open_path[PATH_MAX];
 char preview_path[PATH_MAX];
 
 static void
+handle_chld()
+{
+	while (waitpid((pid_t)(-1), 0, WNOHANG) > 0); 
+}
+
+static void
 handle_redraw()
 {
 	sendwin();
@@ -62,6 +69,7 @@ handle_redraw()
 
 	extern bool items_loading;
 	if (!items_loading) {
+		cancel_preview();
 		refresh_layout();
 	}
 }
@@ -94,7 +102,7 @@ init()
 	start_load(load_items, display_load);
 	init_preview(load_preview);
 	signal(SIGWINCH, handle_redraw);
-	signal(SIGCHLD, SIG_IGN);
+	signal(SIGCHLD, handle_chld);
 }
 
 static char
@@ -196,8 +204,8 @@ search_next(bool reverse)
 static void
 open_file()
 {
-	/* reset sigchld handler, might want to wait */
-	signal(SIGCHLD, SIG_DFL);
+	/* ensure no previews are loading */
+	cancel_preview();
 
 	pid_t pid = fork();
 	if (!pid) { /* child: open file in program though open handler */
@@ -217,27 +225,20 @@ open_file()
 			char *program = strtok(programs, " ");
 			while(program) {
 				if (!strncmp(proc_name, program, strlen(program))) {
-					while(wait(NULL) != pid);
-					handle_redraw(); /* redraw since its probably fucked */
+					ext_waitpid(pid);
 					break;
 				}
 				program = strtok(NULL, " ");
 			}
-		} else { /* edge case: open handler didnt launch anything */
-			while(wait(NULL) != pid);
 		}
 
-		/* ignore sigchld, no zombies allowed */
-		signal(SIGCHLD, SIG_IGN);
+		handle_redraw(); /* redraw since its probably fucked */
 	}
 }
 
 static void
 open_with(char *launcher, char *file, bool cli)
 {
-	/* reset sigchld handler, might want to wait */
-	signal(SIGCHLD, SIG_DFL);
-
 	pid_t pid = fork();
 	if (!pid) { /* child: open file */
 		char cmd[PATH_MAX];
@@ -249,13 +250,11 @@ open_with(char *launcher, char *file, bool cli)
 		_exit(1);
 	} else { /* parent: check launched process */
 		if (cli) {
-			while(wait(NULL) != pid);
-			handle_redraw(); /* redraw since its probably fucked */
+			ext_waitpid(pid);
 		}
-
-		/* ignore sigchld, no zombies allowed */
-		signal(SIGCHLD, SIG_IGN);
 	}
+
+	handle_redraw(); /* redraw since its probably fucked */
 }
 
 static void
@@ -316,9 +315,13 @@ static void
 load_preview()
 {
 	char file[256];
-	prctl(PR_SET_NAME, "preview");
+	extern bool pn;
+	char nthr = pn++;
+	prctl(PR_SET_NAME, nthr ? "preview0" : "preview1");
 	extern pthread_cond_t run_preview;
 	extern pthread_mutex_t preview_lock;
+	extern pthread_mutex_t preview_pid_lock;
+	extern pid_t preview_pid[2];
 	for (;;) {
 		pthread_mutex_lock(&preview_lock);
 		do {
@@ -339,13 +342,15 @@ load_preview()
 				col_px*(COLS/2-3), line_px*(LINES-2), /* preview img size */
 				col_px*(COLS/2+1), line_px);          /* preview img pos */
 
+
 		int fd;
-		FILE *fp = NULL;
+		pthread_mutex_lock(&preview_pid_lock);
+		preview_pid[nthr] = ext_popen(preview_cmd, &fd);
+		pthread_mutex_unlock(&preview_pid_lock);
+
 		int l = 0;
 		char buf[COLS];
-		extern pid_t preview_pid;
-		preview_pid = ext_popen(preview_cmd, &fd);
-		fp = fdopen(fd, "r");
+		FILE *fp = fdopen(fd, "r");
 		while (fgets(buf, COLS, fp)) {
 			smvwaddstr(preview_w, l++, 0, buf);
 		}
@@ -355,7 +360,10 @@ load_preview()
 		sdelwin(preview_w);
 
 		fclose(fp);
-		preview_pid = 0;
+
+		pthread_mutex_lock(&preview_pid_lock);
+		preview_pid[nthr] = 0;
+		pthread_mutex_unlock(&preview_pid_lock);
 	}
 }
 
