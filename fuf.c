@@ -63,8 +63,7 @@ handle_redraw()
 	srefresh();
 
 	/* keep the file list within resized window */
-	scroll_pos = items_len-1 > scroll_pos-LINES+2
-		? items_len-1-LINES+2 : items_len-scroll_pos < LINES+2
+	scroll_pos = items_len-scroll_pos < LINES+2
 		? 0 : scroll_pos;
 
 	extern bool items_loading;
