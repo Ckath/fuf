@@ -1,6 +1,6 @@
 NAME = fuf
 VERSION = "$(shell git describe --tag)"
-CFLAGS =
+CFLAGS = -Os
 LIBS = -lncurses -lpthread
 SRC = ${NAME}.c inc/colors.c inc/sort.c inc/thr.c inc/sysext.c inc/sncurses.c
 OBJ = ${SRC:.c=.o}

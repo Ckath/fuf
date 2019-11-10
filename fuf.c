@@ -89,6 +89,15 @@ init()
 	sprintf(user_config, "%s/.config/fuf/preview", home);
 	sprintf(preview_path, stat(user_config, &sb) == 0 ? user_config : "/usr/lib/fuf/preview");
 
+	/* ls_color check/set */
+	extern char *ls_colors;
+	if (strlen(getenv("LS_COLORS"))) {
+		ls_colors = malloc(strlen(getenv("LS_COLORS")) * sizeof(char));
+		strcpy(ls_colors, getenv("LS_COLORS"));
+	} else {
+		ls_colors = NULL;
+	}
+
 	/* init ncurses */
 	initscr();
 	cbreak();

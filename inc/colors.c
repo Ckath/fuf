@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "colors.h"
 #include "sncurses.h"
+char *ls_colors;
 
 void
 init_colors()
@@ -89,9 +90,9 @@ ls_attr(int val)
 static int
 find_lsattrs(const char *key)
 {
-	char *k = malloc(strlen(getenv("LS_COLORS")) * sizeof(char));
+	char *k = malloc(strlen(ls_colors) * sizeof(char));
 	char *k_addr = k;
-	strcpy(k, getenv("LS_COLORS"));
+	strcpy(k, ls_colors);
 
 	/* find key in LS_COLORS store */
 	char key_match[256];
@@ -108,8 +109,9 @@ find_lsattrs(const char *key)
 
 	/* parse values found in LS_COLORS */
 	int fg = 0, bg = 0, attr = 0;
-	while(k-1) {
-		int val = 0;
+	while(k) {
+		k++;
+		volatile int val = 0;
 		sscanf(k, "%d", &val);
 		if (IS_FG(val)) {
 			fg = val;
@@ -118,7 +120,7 @@ find_lsattrs(const char *key)
 		} else {
 			attr |= ls_attr(val);
 		}
-		k = strchr(k, ';')+1;
+		k = strchr(k, ';');
 	}
 	free(k_addr);
 
@@ -150,7 +152,7 @@ mvwaddcolitem(WINDOW *win, int y, int x, const char *name, mode_t mode)
 		sprintf(fname, "%-*.*s", COLS/2-2, COLS/2-2, name);
 	}
 
-	if (!getenv("LS_COLORS")) {
+	if (!ls_colors) {
 		smvwaddstr(win, y, x-1, fname);
 		return;
 	}
