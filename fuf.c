@@ -140,11 +140,11 @@ str_prompt(char *prefix, char *result)
 	smvwaddstr(prompt, 0, 0, prefix);
 	keypad(prompt, true);
 	swrefresh(prompt);
-	curs_set(1);
 
 	int c;
 	unsigned i = 0;
 	while ((c = wgetch(prompt))) {
+		curs_set(1);
 		switch(c) {
 			case KEY_LEFT: /* not handling these keys */
 			case KEY_RIGHT:
@@ -542,6 +542,9 @@ main(int argc, char *argv[])
 		cancel_preview();
 		stop_load();
 		switch(ch) {
+			case '\232': /* handle request for redraw after resize */
+				refresh_layout();
+				break;
 			case 'j':
 				sel_item += sel_item < items_len-1 ? 1 : 0;
 				refresh_layout();
