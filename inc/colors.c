@@ -111,7 +111,7 @@ find_lsattrs(const char *key)
 	int fg = 0, bg = 0, attr = 0;
 	while(k) {
 		k++;
-		volatile int val = 0;
+		int val = 0;
 		sscanf(k, "%d", &val);
 		if (IS_FG(val)) {
 			fg = val;
