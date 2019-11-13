@@ -91,7 +91,7 @@ init()
 
 	/* ls_color check/set */
 	extern char *ls_colors;
-	if (strlen(getenv("LS_COLORS"))) {
+	if (getenv("LS_COLORS") && strlen(getenv("LS_COLORS"))) {
 		ls_colors = malloc(strlen(getenv("LS_COLORS")) * sizeof(char));
 		strcpy(ls_colors, getenv("LS_COLORS"));
 	} else {
