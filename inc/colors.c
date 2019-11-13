@@ -106,11 +106,12 @@ find_lsattrs(const char *key)
 	}
 	strchr(k, ':')[0] = '\0';
 	k += strlen(key_match);
+	char *k_ = k;
 
 	/* parse values found in LS_COLORS */
 	int fg = 0, bg = 0, attr = 0;
 	while(k) {
-		k++;
+		k += k_==k ? 0 : 1;
 		int val = 0;
 		sscanf(k, "%d", &val);
 		if (IS_FG(val)) {
