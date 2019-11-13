@@ -13,11 +13,10 @@ another cli filebrowser made just for myself with the following ideas:
 
 ## keybinds
 ### vim - work mostly as expected
-`j`,`k`,`l`,`h`,`H`,`M`,`L`,`G`,`gg`,`/`,`n`,`N`,`q`,`^u`,`^d`,`^f`,`^b`,`^y`,`^e`,`zz`,`zb`,`zt`
+`j`,`k`,`l`,`h`,`H`,`M`,`L`,`G`,`gg`,`/`,`n`,`N`,`q`,`^u`,`^d`,`^f`,`^b`,`^y`,`^e`,`zz`,`zb`,`zt`,`^l`
 ### non vim
 `s`: sort (+`a`/`A` alphabetical, +`s`/`S` size based, +`t`/`T` time based)\
 `r`: reload\
-`R`: force redraw of ui\
 `o`: open file with program, don't wait/non cli\
 `O`: open file with program, wait/cli\
 `t`: open shell in current directory, exit it to return to fuf

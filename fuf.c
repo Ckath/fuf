@@ -580,7 +580,7 @@ main(int argc, char *argv[])
 				strcpy(goto_item, items[sel_item].name);
 				start_load(load_items, display_load);
 				break;
-			case 'R':
+			case CTRL('l'):
 				handle_redraw();
 				break;
 			case 'g':
