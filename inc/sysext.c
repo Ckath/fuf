@@ -72,7 +72,9 @@ ext_chldname(pid_t pid, char *name)
 	do {
 		pid = chld_pid;
 		sprintf(path, "/proc/%d/task/%d/children", pid, pid);
-		f = fopen(path, "r");
+		if (!(f = fopen(path, "r"))) {
+			return NULL;
+		}
 		chld_pid = 0;
 		fscanf(f, "%d", &chld_pid);
 		fclose(f);
