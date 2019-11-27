@@ -62,10 +62,28 @@ sbox(WINDOW *win, chtype verch, chtype horch)
 }
 
 int
+sgetch(void)
+{
+	pthread_mutex_lock(&ncurses_lock);
+	int r = getch();
+	pthread_mutex_unlock(&ncurses_lock);
+	return r;
+}
+
+int
 swaddch(WINDOW *win, const chtype ch)
 {
 	pthread_mutex_lock(&ncurses_lock);
 	int r = waddch(win, ch);
+	pthread_mutex_unlock(&ncurses_lock);
+	return r;
+}
+
+int
+swgetch(WINDOW *win)
+{
+	pthread_mutex_lock(&ncurses_lock);
+	int r = wgetch(win);
 	pthread_mutex_unlock(&ncurses_lock);
 	return r;
 }

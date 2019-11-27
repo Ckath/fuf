@@ -137,7 +137,7 @@ ch_prompt(char *prefix)
 	free(str);
 	swrefresh(prompt);
 
-	char c = getch();
+	char c = sgetch();
 	sdelwin(prompt);
 	return c;
 }
@@ -152,7 +152,7 @@ str_prompt(char *prefix, char *result)
 
 	int c;
 	unsigned i = 0;
-	while ((c = wgetch(prompt))) {
+	while ((c = swgetch(prompt))) {
 		curs_set(1);
 		switch(c) {
 			case KEY_LEFT: /* not handling these keys */
@@ -749,11 +749,11 @@ main(int argc, char *argv[])
 				}
 				break;
 			case 't':
-				endwin();
+				sendwin();
 				open_with(getenv("SHELL"), NULL, true);
 				break;
 		}
 	}
-	endwin();
+	sendwin();
 	return 0;
 }
