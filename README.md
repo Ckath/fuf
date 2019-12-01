@@ -36,7 +36,7 @@ install either [fuf](https://aur.archlinux.org/packages/fuf) or [fuf-git](https:
 `sudo make uninstall`
 ### configuration
 `mkdir ~/.config/fuf && cp /usr/lib/fuf/* ~/.config/fuf`\
-grab the default scripts and move them to local copies, you can also choose symlink xdg-open or other open managers to ~/.config/fuf/open at this point. the fuf preview and open executables/scripts fully handle opening and previewing files, this means you can customize the way this is handled completely within these scripts.
+grab the default scripts and move them to local copies, you can also choose symlink xdg-open or other open managers to ~/.config/fuf/open at this point. the fuf preview and open executables/scripts fully handle opening and previewing files, this means you can customize the way this is handled completely within these scripts. also see [the minimal open script I use personally](https://github.com/Ckath/dotfiles-n-stuff/blob/master/.config/fuf/open).
 
 ## non issues/wontfix
 - preview showing `no preview configured`\
