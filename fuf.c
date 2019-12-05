@@ -41,7 +41,7 @@ static void refresh_layout(); /* main refresh */
 
 /* all needed info about current state */
 item *items;
-unsigned items_len = 0;
+_Atomic unsigned items_len = 0;
 unsigned scroll_pos = 0;
 unsigned sel_item = 0;
 void *sort = alpha_cmp;
@@ -544,6 +544,7 @@ main(int argc, char *argv[])
 	init();
 
 	/* main key handling loop */
+	extern bool items_loading;
 	char launcher[256];
 	char cwd[PATH_MAX];
 	char ch;
@@ -577,8 +578,10 @@ main(int argc, char *argv[])
 				}
 				break;
 			case 'r':
-				strcpy(goto_item, items[sel_item].name);
-				start_load(load_items, display_load);
+				if (!items_loading) {
+					strcpy(goto_item, items[sel_item].name);
+					start_load(load_items, display_load);
+				}
 				break;
 			case CTRL('l'):
 				handle_redraw();

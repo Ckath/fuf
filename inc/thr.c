@@ -15,12 +15,16 @@ pthread_cond_t run_preview = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t preview_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t preview_pid_lock = PTHREAD_MUTEX_INITIALIZER;
 pid_t preview_pid[2];
-bool items_loading = false;
-bool pn = false;
+_Atomic bool items_loading = false;
+_Atomic bool pn = false;
 
 void
 start_load(void *load_items, void *display_load)
 {
+	if (items_loading) {
+		return;
+	}
+
 	items_loading = true;
 	pthread_create(&load_thr, NULL, load_items, NULL);
 	pthread_create(&display_thr, NULL, display_load, NULL);
