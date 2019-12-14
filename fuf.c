@@ -553,7 +553,7 @@ main(int argc, char *argv[])
 		stop_load();
 		switch(ch) {
 			case '\232': /* handle request for redraw after resize */
-				refresh_layout();
+				handle_redraw();
 				break;
 			case 'j':
 				sel_item += sel_item < items_len-1 ? 1 : 0;
