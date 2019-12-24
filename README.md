@@ -51,6 +51,8 @@ either the open script isn't setup to open this filetype or you dont have any of
 this is done on purpose, sizes are displayed as they are given by stat, calculating size of directory contents is too costly
 - no colors anywhere\
 set your `LS_COLORS`, ls defaults back to an unfindable default, fuf only reads the `LS_COLORS` variable
+- it only seems to support 8 colors of my colorscheme or ignore the other 8\
+ncurses only supports 8 colors, to some extend, by default. I use an 8 color colorscheme anyway and cannot be bothered to work around this.
 - no mouse support\
 this will never be added, it annoys me
 - problems with programs using terminal as ui\
