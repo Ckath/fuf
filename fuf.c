@@ -76,6 +76,13 @@ handle_redraw()
 static void
 init()
 {
+	/* give some useful advice */
+	if (getenv("WAYLAND_DISPLAY") ||
+			!strcmp(getenv("XDG_SESSION_TYPE"), "wayland")) {
+		fputs("stop using wayland\n", stderr);
+		exit(1);
+	}
+
 	/* check location of scripts */
 	setlocale(LC_ALL, "");
 	char user_config[PATH_MAX];
