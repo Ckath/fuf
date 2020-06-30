@@ -144,7 +144,7 @@ ch_prompt(char *prefix)
 	free(str);
 	swrefresh(prompt);
 
-	char c = sgetch();
+	char c = getch();
 	sdelwin(prompt);
 	return c;
 }
@@ -159,7 +159,7 @@ str_prompt(char *prefix, char *result)
 
 	int c;
 	unsigned i = 0;
-	while ((c = swgetch(prompt))) {
+	while ((c = wgetch(prompt))) {
 		curs_set(1);
 		switch(c) {
 			case KEY_LEFT: /* not handling these keys */
@@ -175,6 +175,7 @@ str_prompt(char *prefix, char *result)
 			case 10:
 			case KEY_ENTER:
 				break;
+			case 410: /* resize request */
 			case '': /* ESC */
 				strcpy(result, "");
 				break;
