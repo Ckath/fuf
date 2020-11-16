@@ -560,24 +560,38 @@ main(int argc, char *argv[])
 		cancel_preview();
 		stop_load();
 		switch(ch) {
+			case '\033': /* terrible hack for arrow keys without keypad  mode */
+				if (getch() == '[') {
+					switch(getch()) {
+						case 'B': goto key_down;
+						case 'A': goto key_up;
+						case 'D': goto key_left;
+						case 'C': goto key_right;
+					}
+				}
+				break;
 			case '\232': /* handle request for redraw after resize */
 				handle_redraw();
 				break;
 			case 'j':
+			key_down:
 				sel_item += sel_item < items_len-1 ? 1 : 0;
 				refresh_layout();
 				break;
 			case 'k':
+			key_up:
 				sel_item -= sel_item > 0 ? 1 : 0;
 				refresh_layout();
 				break;
 			case 'h':
+			key_left:
 				getcwd(cwd, PATH_MAX);
 				strcpy(goto_item, basename(cwd));
 				chdir("..");
 				start_load(load_items, display_load);
 				break;
 			case 'l':
+			key_right:
 				if (items[sel_item].dir) {
 					chdir(items[sel_item].name);
 					start_load(load_items, display_load);
