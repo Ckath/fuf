@@ -19,7 +19,8 @@ another cli filebrowser made just for myself with the following ideas:
 `r`: reload\
 `o`: open file with program, don't wait/non cli\
 `O`: open file with program, wait/cli\
-`t`: open shell in current directory, exit it to return to fuf
+`t`: open shell in current directory, exit it to return to fuf\
+`ENTER`: open file with open script, don't wait/non cli
 
 ## development
 current bugs, features and enhancements in the works are kept track of in [issues](https://github.com/Ckath/fuf/issues), refer to this to see what's happening at the moment. PRs are always welcome, but make an issue first to discuss any new features or bugs.
@@ -55,8 +56,8 @@ set your `LS_COLORS`, ls defaults back to an unfindable default, fuf only reads 
 ncurses only supports 8 colors, to some extend, by default. I use an 8 color colorscheme anyway and cannot be bothered to work around this.
 - no mouse support\
 this will never be added, it annoys me
-- problems with programs using terminal as ui\
-these are whitelisted in fuf in the `CLI_PROGRAMS` definition in fuf.c, make a pr or issue for one to be added
+- problems with programs hanging fuf after opening\
+by default everything spawned by the open handler is treated as cli, open with `ENTER` instead of `l`
 - issues related to scripts remain after update that should fix them\
 since fuf allows you use your own versions of the scripts in ~/.config/fuf its up to yourself to keep up with patching these with the latest changes from the /usr/lib/fuf supplied ones.
 - doesn't compile/work under *some architecture/distro/os/terminal emulator*\

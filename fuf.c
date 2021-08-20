@@ -32,9 +32,8 @@ static void init();
 static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
 static void search_next(bool reverse);
-static void open_file();      /* async */
 static void open_with(char *launcher, char *file, bool cli);
-static void display_load();
+static void display_load();   /* async */
 static void load_items();
 static void load_preview();
 static void refresh_layout(); /* main refresh */
@@ -221,42 +220,6 @@ search_next(bool reverse)
 	sel_item = search_pos%items_len;
 }
 
-
-static void
-open_file()
-{
-	/* ensure no previews are loading */
-	cancel_preview();
-
-	pid_t pid = fork();
-	if (!pid) { /* child: open file in program though open handler */
-		char file[256];
-		strcpy(file, items[sel_item].name);
-		free(items);
-		execlp(open_path, "open", file, NULL);
-		_exit(1);
-	} else { /* parent: check launched process */
-		char proc_name[256];
-		sleep(1); /* 1s, time open handler has to start program */
-
-		if (ext_chldname(pid, proc_name)) { /* a program was launched by open handler */
-			/* check if its a cli program fuf should wait for */
-			char programs[strlen(CLI_PROGRAMS)+1];
-			strcpy(programs, CLI_PROGRAMS);
-			char *program = strtok(programs, " ");
-			while(program) {
-				if (!strncmp(proc_name, program, strlen(program))) {
-					ext_waitpid(pid);
-					break;
-				}
-				program = strtok(NULL, " ");
-			}
-		}
-
-		handle_redraw(); /* redraw since its probably fucked */
-	}
-}
-
 static void
 open_with(char *launcher, char *file, bool cli)
 {
@@ -267,11 +230,11 @@ open_with(char *launcher, char *file, bool cli)
 				file ? "%s \"%s\" &>/dev/null":"%s &>/dev/null",
 				launcher, ext_shesc(file));
 		free(items);
-		execl("/bin/bash", "bash", "-c", cmd, NULL);
+		execl(getenv("SHELL"), getenv("SHELL"), "-c", cmd, NULL);
 		_exit(1);
 	} else { /* parent: check launched process */
 		if (cli) {
-			ext_waitpid(pid);
+			wait(NULL);
 		}
 	}
 
@@ -601,7 +564,15 @@ main(int argc, char *argv[])
 					chdir(items[sel_item].name);
 					start_load(load_items, display_load);
 				} else {
-					open_file();
+					open_with(open_path, items[sel_item].name, true);
+				}
+				break;
+			case 10: /* '\n' */
+				if (items[sel_item].dir) {
+					chdir(items[sel_item].name);
+					start_load(load_items, display_load);
+				} else {
+					open_with(open_path, items[sel_item].name, false);
 				}
 				break;
 			case 'r':

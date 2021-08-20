@@ -2,11 +2,9 @@
  * extended system functions
  * ext_kill: kills process and all child processes
  * ext_popen: popen clone that returns pid of process
- * ext_chldname: get name of youngest child process
  * ext_filesize: human readable filesize
  * ext_shesc: questionable escaping for strings passed to the shell
- * ext_itoa: itoa equivalent that reuses input buffer
- * ext_waitpid: wait until pid exists, regardless if its a child */
+ * ext_itoa: itoa equivalent that reuses input buffer */
 
 #include <signal.h>
 #include <stdbool.h>
@@ -64,36 +62,6 @@ ext_popen(const char *command, int *fd)
 }
 
 char *
-ext_chldname(pid_t pid, char *name)
-{
-	char path[256];
-	int chld_pid = pid;
-	FILE *f;
-	do {
-		pid = chld_pid;
-		sprintf(path, "/proc/%d/task/%d/children", pid, pid);
-		if (!(f = fopen(path, "r"))) {
-			return NULL;
-		}
-		chld_pid = 0;
-		fscanf(f, "%d", &chld_pid);
-		fclose(f);
-	} while(chld_pid);
-
-	if (!pid) {
-		name[0] = '\0';
-		return NULL;
-	}
-
-	sprintf(path, "/proc/%d/comm", pid);
-	f = fopen(path, "r");
-	fgets(name, 256, f);
-
-	fclose(f);
-	return name;
-}
-
-char *
 ext_filesize(long size, char *humanfs)
 {
 	const char units[] = {'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'};
@@ -135,15 +103,4 @@ ext_itoa(int i, char *s)
 	sprintf(o, "%d", i);
 	s_idpos += strlen(o)+1;
 	return o;
-}
-
-void
-ext_waitpid(pid_t pid)
-{
-	struct stat sb;
-	char proc_pid[256];
-	sprintf(proc_pid, "/proc/%d", pid);
-	while(stat(proc_pid, &sb) == 0) {
-		usleep(10000);
-	}
 }
