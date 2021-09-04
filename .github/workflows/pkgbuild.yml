@@ -1,0 +1,23 @@
+name: build pkgbuild
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pkgbuild-validate:
+    runs-on: ubuntu-latest
+    name: Validate a Pull Request
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: build pkg
+        id: makepkg
+        uses: edlanglois/pkgbuild-action@v1
+        with:
+          pkgdir: 'pkg/fuf-bin'
+      - name: upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: arch-pkg
+          path: "${{ steps.makepkg.outputs.pkgfile0 }}"
