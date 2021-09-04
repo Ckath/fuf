@@ -7,17 +7,57 @@ on:
 jobs:
   pkgbuild-validate:
     runs-on: ubuntu-latest
-    name: Validate a Pull Request
+    name: makepkg validation of current commit
     steps:
       - name: checkout
         uses: actions/checkout@v2
+
       - name: build pkg
         id: makepkg
         uses: edlanglois/pkgbuild-action@v1
         with:
           pkgdir: 'pkg/fuf-bin'
+
       - name: upload results
         uses: actions/upload-artifact@v2
         with:
-          name: arch-pkg
+          name: fuf-arch-pkg
           path: "${{ steps.makepkg.outputs.pkgfile0 }}"
+          
+  release:
+    name: create nightly release
+    needs: pkgbuild-validate
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    steps:
+      - name: create release
+        id: create_release
+        uses: Ckath/create-release@v1.2.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: latest-build
+          release_name: latest build
+          body: |
+              Newest working commit on master
+          prerelease: true
+
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: fuf-arch-pkg
+          path: .
+      - id: artifact
+        run: echo ::set-output name=file::$(ls *.zst)
+
+      - name: upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_name: ${{ steps.artifact.outputs.file }}
+          asset_path: ${{ steps.artifact.outputs.file }}
+          asset_content_type: application/zstd
