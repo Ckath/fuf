@@ -16,7 +16,8 @@ jobs:
         uses: edlanglois/pkgbuild-action@v1
         with:
           pkgdir: 'pkg/fuf-bin'
-      - name: print results
-        run: |
-          echo "successfully created the following package archive"
-          echo "Package: ${{ steps.makepkg.outputs.pkgfile0 }}"
+      - name: upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: arch-pkg
+          path: "${{ steps.makepkg.outputs.pkgfile0 }}"
