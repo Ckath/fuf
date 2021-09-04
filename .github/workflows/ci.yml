@@ -1,4 +1,3 @@
----
 name: ci
 
 on:
@@ -6,30 +5,18 @@ on:
   pull_request:
 
 jobs:
-  validation:
+  pkgbuild-validate:
     runs-on: ubuntu-latest
     name: Validate a Pull Request
     steps:
-      - uses: actions/checkout@v1
-
-      - name: Validate PKGBUILD
-        id: validate-pkgbuild
-        uses: 2m/arch-pkgbuild-builder@v1.16
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: build pkg
+        id: makepkg
+        uses: edlanglois/pkgbuild-action@v1
         with:
-          target: 'pkgbuild'
-          pkgname: 'pkg/fuf-git'
-
-      - name: Validate SRCINFO
-        id: validate-srcinfo
-        uses: 2m/arch-pkgbuild-builder@v1.16
-        with:
-          target: 'srcinfo'
-          pkgname: 'pkg/fuf-git'
-
-      - name: Validate binary
-        id: validate-binary
-        uses: 2m/arch-pkgbuild-builder@v1.16
-        with:
-          target: 'run'
-          pkgname: 'pkg/fuf-git'
-          command: 'fuf -v'
+          pkgdir: 'pkg/fuf-git'
+      - name: print results
+        run: |
+          echo "Successfully created the following package archive"
+          echo "Package: ${{ steps.makepkg.outputs.pkgfile0 }}"
