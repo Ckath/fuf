@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <signal.h>
+#include <dirent.h> /* this is where PATH_MAX comes from, dont think about it */
 #include <stdbool.h>
 #include "thr.h"
 #include "sysext.h"
@@ -16,6 +17,7 @@ pthread_mutex_t preview_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t preview_pid_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_spinlock_t redraw_lock;
 pid_t preview_pid[2];
+char preview_job[2][PATH_MAX];
 _Atomic bool items_loading = false;
 _Atomic bool pn = false;
 

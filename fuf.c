@@ -24,8 +24,6 @@
 #include "inc/thr.h"
 #include "inc/item.h"
 
-#define CLI_PROGRAMS "vi nvim nano dhex man w3m elinks links2 links lynx"
-
 static void handle_redraw();  /* utility */
 static void handle_chld();
 static void init();
@@ -33,6 +31,7 @@ static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
 static void search_next(bool reverse);
 static void open_with(char *launcher, char *file, bool cli);
+static void reset_preview();
 static void display_load();   /* async */
 static void load_items();
 static void load_preview();
@@ -127,6 +126,10 @@ init()
 static char
 ch_prompt(char *prefix)
 {
+	/* has to be done to unfuck the resize situation */
+	reset_preview();
+	handle_redraw();
+
 	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
 
 	bool bold = false;
@@ -156,6 +159,10 @@ ch_prompt(char *prefix)
 static void
 str_prompt(char *prefix, char *result)
 {
+	/* has to be done to unfuck the resize situation */
+	reset_preview();
+	handle_redraw();
+
 	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
 	smvwaddstr(prompt, 0, 0, prefix);
 	keypad(prompt, true);
@@ -235,10 +242,25 @@ open_with(char *launcher, char *file, bool cli)
 	} else { /* parent: check launched process */
 		if (cli) {
 			wait(NULL);
+			reset_preview();
+			handle_redraw(); /* redraw since its probably fucked */
 		}
 	}
 
-	handle_redraw(); /* redraw since its probably fucked */
+}
+
+static void
+reset_preview()
+{
+	/* extern bodgery for preview */
+	extern char preview_job[2][PATH_MAX];
+	extern pthread_mutex_t preview_pid_lock;
+
+	/* clear preview duplicate check to ensure reload */
+	pthread_mutex_lock(&preview_pid_lock);
+	strcpy(preview_job[0], "");
+	strcpy(preview_job[1], "");
+	pthread_mutex_unlock(&preview_pid_lock);
 }
 
 static void
@@ -306,6 +328,7 @@ load_preview()
 	extern pthread_mutex_t preview_lock;
 	extern pthread_mutex_t preview_pid_lock;
 	extern pid_t preview_pid[2];
+	extern char preview_job[2][PATH_MAX];
 	for (;;) {
 		pthread_mutex_lock(&preview_lock);
 		do {
@@ -326,6 +349,13 @@ load_preview()
 				col_px*(COLS/2-3), line_px*(LINES-2), /* preview img size */
 				col_px*(COLS/2+1), line_px);          /* preview img pos */
 
+		/* try to avoid duplicate jobs */
+		pthread_mutex_lock(&preview_pid_lock);
+		strcpy(preview_job[nthr], preview_cmd);
+		pthread_mutex_unlock(&preview_pid_lock);
+		if (!strcmp(preview_job[nthr], preview_job[!nthr])) {
+			continue;
+		}
 
 		int fd;
 		pthread_mutex_lock(&preview_pid_lock);
@@ -538,9 +568,6 @@ main(int argc, char *argv[])
 					}
 				}
 				break;
-			case '\232': /* handle request for redraw after resize */
-				handle_redraw();
-				break;
 			case 'j':
 			key_down:
 				sel_item += sel_item < items_len-1 ? 1 : 0;
@@ -577,11 +604,13 @@ main(int argc, char *argv[])
 				break;
 			case 'r':
 				if (!items_loading) {
+					reset_preview();
 					strcpy(goto_item, items[sel_item].name);
 					start_load(load_items, display_load);
 				}
 				break;
 			case CTRL('l'):
+				reset_preview();
 				handle_redraw();
 				break;
 			case 'g':
