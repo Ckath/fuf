@@ -128,7 +128,7 @@ ch_prompt(char *prefix)
 {
 	/* has to be done to unfuck the resize situation */
 	reset_preview();
-	handle_redraw();
+	refresh_layout();
 
 	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
 
@@ -161,7 +161,7 @@ str_prompt(char *prefix, char *result)
 {
 	/* has to be done to unfuck the resize situation */
 	reset_preview();
-	handle_redraw();
+	refresh_layout();
 
 	WINDOW *prompt = snewwin(1, COLS, LINES-1, 1);
 	smvwaddstr(prompt, 0, 0, prefix);
