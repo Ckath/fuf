@@ -760,6 +760,7 @@ main(int argc, char *argv[])
 							sel_item + LINES-3 : scroll_pos;
 						break;
 				}
+				reset_preview();
 				refresh_layout();
 				break;
 			case 'o':
