@@ -64,6 +64,7 @@ xwinwatch()
 	}
 	XSetErrorHandler(xerrorignore);
 	XSelectInput(dpy, DefaultRootWindow(dpy), SubstructureNotifyMask);
+	prctl(PR_SET_NAME, "winwatch");
 
 	/* watch for new windows with fufs pgid */
 	XEvent ev;
