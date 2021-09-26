@@ -72,8 +72,7 @@ xwinwatch()
 	for (;; XNextEvent(dpy, &ev)) {
 		if (ev.type == CreateNotify) {
 			newwin = ev.xcreatewindow.window;
-		} if (ev.type == ConfigureNotify &&
-				newwin && (winpid = xwinpid(dpy, newwin))) {
+		} else if (newwin && (winpid = xwinpid(dpy, newwin))) {
 			if (getpgid(winpid) == fuf_pgid) {
 				abandon_chld = true;
 			}
