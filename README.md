@@ -18,8 +18,8 @@ another cli filebrowser made just for myself with the following ideas:
 ### non vim
 `s`: sort (+`a`/`A` alphabetical, +`s`/`S` size based, +`t`/`T` time based)\
 `r`: reload\
-`o`: open file with program, don't wait/non cli\
-`O`: open file with program, wait/cli\
+`o`: open file with program, wait/cli\
+`O`: open file with program, don't wait/non cli, shouldnt need this with working X11\
 `t`: open shell in current directory, exit it to return to fuf\
 `ENTER`: open file with open script, don't wait/non cli, shouldnt need this with working X11
 

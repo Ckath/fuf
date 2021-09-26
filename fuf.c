@@ -807,7 +807,7 @@ main(int argc, char *argv[])
 			case 'o':
 				str_prompt("open with: ", launcher);
 				if (launcher[0]) {
-					open_with(launcher, items[sel_item].name, false);
+					open_with(launcher, items[sel_item].name, true);
 				} else {
 					refresh_layout();
 				}
@@ -815,7 +815,7 @@ main(int argc, char *argv[])
 			case 'O':
 				str_prompt("open with: ", launcher);
 				if (launcher[0]) {
-					open_with(launcher, items[sel_item].name, true);
+					open_with(launcher, items[sel_item].name, false);
 				} else {
 					refresh_layout();
 				}
