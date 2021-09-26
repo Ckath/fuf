@@ -91,8 +91,6 @@ handle_chld()
 static void
 handle_redraw()
 {
-	extern pthread_spinlock_t redraw_lock;
-	pthread_spin_lock(&redraw_lock);
 	sendwin();
 	srefresh();
 
@@ -105,7 +103,6 @@ handle_redraw()
 		cancel_preview();
 		refresh_layout();
 	}
-	pthread_spin_unlock(&redraw_lock);
 }
 
 static void
@@ -151,8 +148,6 @@ init()
 
 	/* init fuf */
 	fuf_pgid = getpgid(getpid());
-	extern pthread_spinlock_t redraw_lock; /* not the right place for this */
-	pthread_spin_init(&redraw_lock, PTHREAD_PROCESS_SHARED); /* , whatever */
 	handle_redraw();
 	start_load(load_items, display_load);
 	init_preview(load_preview);
