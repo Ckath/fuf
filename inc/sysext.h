@@ -9,4 +9,7 @@ char *ext_shesc(char *s);
 char *ext_itoa(int i, char *s);
 void ext_waitpid(pid_t pid);
 
+/* hide compound literal abuse */
+#define N(t) &(t){0}
+
 #endif

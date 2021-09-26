@@ -23,6 +23,9 @@
 #include "inc/sysext.h"
 #include "inc/thr.h"
 #include "inc/item.h"
+#ifdef X_HACKS
+#include "inc/xhacks.h"
+#endif
 
 static void handle_redraw();  /* utility */
 static void handle_chld();
@@ -40,6 +43,7 @@ static void refresh_layout(); /* main refresh */
 /* all needed info about current state */
 item *items;
 _Atomic unsigned items_len = 0;
+_Atomic bool abandon_chld = false;
 unsigned scroll_pos = 0;
 unsigned sel_item = 0;
 void *sort = alpha_cmp;
@@ -47,6 +51,37 @@ char search[256];
 char goto_item[256];
 char open_path[PATH_MAX];
 char preview_path[PATH_MAX];
+pid_t fuf_pgid;
+
+#ifdef X_HACKS
+static void
+xwinwatch()
+{
+	/* connect to display and subscribe to events */
+	Display *dpy = XOpenDisplay(NULL);
+	if (!dpy) { /* no usable X, bailing */
+		return;
+	}
+	XSetErrorHandler(xerrorignore);
+	XSelectInput(dpy, DefaultRootWindow(dpy), SubstructureNotifyMask);
+
+	/* watch for new windows with fufs pgid */
+	XEvent ev;
+	Window newwin = 0;
+	int winpid = 0;
+	for (;; XNextEvent(dpy, &ev)) {
+		if (ev.type == CreateNotify) {
+			newwin = ev.xcreatewindow.window;
+		} if (ev.type == ConfigureNotify &&
+				newwin && (winpid = xwinpid(dpy, newwin))) {
+			if (getpgid(winpid) == fuf_pgid) {
+				abandon_chld = true;
+			}
+			newwin = 0;
+		}
+	}
+}
+#endif
 
 static void
 handle_chld()
@@ -77,12 +112,14 @@ handle_redraw()
 static void
 init()
 {
+#ifdef X_HACKS
 	/* give some useful advice */
 	if (getenv("WAYLAND_DISPLAY") ||
 			!strcmp(getenv("XDG_SESSION_TYPE"), "wayland")) {
 		fputs("stop using wayland\n", stderr);
 		exit(1);
 	}
+#endif
 
 	/* check location of scripts */
 	setlocale(LC_ALL, "");
@@ -114,11 +151,16 @@ init()
 	init_colors();
 
 	/* init fuf */
+	fuf_pgid = getpgid(getpid());
 	extern pthread_spinlock_t redraw_lock; /* not the right place for this */
 	pthread_spin_init(&redraw_lock, PTHREAD_PROCESS_SHARED); /* , whatever */
 	handle_redraw();
 	start_load(load_items, display_load);
 	init_preview(load_preview);
+#ifdef X_HACKS
+	init_xwinwatch(xwinwatch);
+#endif
+
 	signal(SIGWINCH, handle_redraw);
 	signal(SIGCHLD, handle_chld);
 }
@@ -241,9 +283,13 @@ open_with(char *launcher, char *file, bool cli)
 		_exit(1);
 	} else { /* parent: check launched process */
 		if (cli) {
-			wait(NULL);
-			reset_preview();
-			handle_redraw(); /* redraw since its probably fucked */
+			abandon_chld = false;
+			while (!waitpid(pid, N(int), WNOHANG) && !abandon_chld) {
+				sleep(1);
+			} if (!abandon_chld) {
+				reset_preview();
+				handle_redraw(); /* redraw since its probably fucked */
+			}
 		}
 	}
 

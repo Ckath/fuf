@@ -7,6 +7,13 @@ OBJ = ${SRC:.c=.o}
 DESTDIR = /usr
 CC = gcc
 
+XHACKS := yes
+ifeq ($(XHACKS),yes)
+LIBS += -DX_HACKS -lX11
+SRC += inc/xhacks.c
+OBJ = ${SRC:.c=.o}
+endif
+
 .c.o:
 	@echo CC -c ${CFLAGS} $<
 	@${CC} -c ${CFLAGS} -DVERSION=\"${VERSION}\" $< ${LIBS} -o ${<:.c=.o}

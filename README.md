@@ -10,6 +10,7 @@ another cli filebrowser made just for myself with the following ideas:
 - no fancy file edit operations, at most drop to shell
 - no fancy in depth configuration besides the scripts
 - minimize hanging due to unneeded disk io
+- correctly detect cli programs, dont wait for spawned programs unless needed
 
 ## keybinds
 ### vim - work mostly as expected
@@ -20,7 +21,7 @@ another cli filebrowser made just for myself with the following ideas:
 `o`: open file with program, don't wait/non cli\
 `O`: open file with program, wait/cli\
 `t`: open shell in current directory, exit it to return to fuf\
-`ENTER`: open file with open script, don't wait/non cli
+`ENTER`: open file with open script, don't wait/non cli, shouldnt need this with working X11
 
 ## development
 current bugs, features and enhancements in the works are kept track of in [issues](https://github.com/Ckath/fuf/issues), refer to this to see what's happening at the moment. PRs are always welcome, but make an issue first to discuss any new features or bugs.
@@ -40,6 +41,8 @@ install either [fuf](https://aur.archlinux.org/packages/fuf) or [fuf-git](https:
 grab the default scripts and move them to local copies, you can also choose symlink xdg-open or other open managers to ~/.config/fuf/open at this point. the fuf preview and open executables/scripts fully handle opening and previewing files, this means you can customize the way this is handled completely within these scripts. also see [the minimal open script I use personally](https://github.com/Ckath/dotfiles-n-stuff/blob/master/.config/fuf/open).
 
 ## non issues/wontfix
+- it deps X11??? but its a cli file browser?????\
+look detecting cli/non cli programs wasnt as straight forward as expected, just dont think about it and stop using wayland. if you hate things working, compile with `make XHACKS=no`
 - preview showing `no preview configured`\
 you are lacking a program used to generate previews, change it in the script or install them
 - image previews not working\

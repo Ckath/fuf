@@ -12,6 +12,9 @@ pthread_t load_thr;
 pthread_t display_thr;
 pthread_t preview_main_thr;
 pthread_t preview_backup_thr;
+#ifdef X_HACKS
+pthread_t x_thr;
+#endif
 pthread_cond_t run_preview = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t preview_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t preview_pid_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -69,3 +72,11 @@ cancel_preview()
 	}
 	pthread_mutex_unlock(&preview_pid_lock);
 }
+
+#ifdef X_HACKS
+void
+init_xwinwatch(void *xwinwatch)
+{
+	pthread_create(&x_thr, NULL, xwinwatch, NULL);
+}
+#endif

@@ -6,5 +6,8 @@ void stop_load();
 void init_preview(void *load_preview);
 void queue_preview();
 void cancel_preview();
+#ifdef X_HACKS
+void init_xwinwatch(void *xwinwatch);
+#endif
 
 #endif
