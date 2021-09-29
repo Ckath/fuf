@@ -770,6 +770,7 @@ main(int argc, char *argv[])
 			case '/':
 				str_prompt("search: ", search);
 				search_next(false);
+				reset_preview();
 				refresh_layout();
 				break;
 			case 'n':
@@ -810,6 +811,7 @@ main(int argc, char *argv[])
 				if (launcher[0]) {
 					open_with(launcher, items[sel_item].name, true);
 				} else {
+					reset_preview();
 					refresh_layout();
 				}
 				break;
@@ -818,6 +820,7 @@ main(int argc, char *argv[])
 				if (launcher[0]) {
 					open_with(launcher, items[sel_item].name, false);
 				} else {
+					reset_preview();
 					refresh_layout();
 				}
 				break;
