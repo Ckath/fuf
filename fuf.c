@@ -689,6 +689,7 @@ main(int argc, char *argv[])
 						break;
 				}
 				qsort(items, items_len, sizeof(item), sort);
+				reset_preview();
 				refresh_layout();
 				break;
 			case 'H':
