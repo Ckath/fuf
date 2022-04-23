@@ -20,7 +20,7 @@ another cli filebrowser made just for myself with the following ideas:
 `r`: reload\
 `o`: open file with program, wait/cli\
 `O`: open file with program, don't wait/non cli, shouldnt need this with working X11\
-`t`: open shell in current directory, exit it to return to fuf\
+`t`: open shell in current directory, selected file in `$FUFSEL`, exit it to return to fuf\
 `ENTER`: open file with open script, don't wait/non cli, shouldnt need this with working X11
 
 ## development
