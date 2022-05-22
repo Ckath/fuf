@@ -354,6 +354,15 @@ load_items()
 		closedir(dp);
 		items_loading = false;
 	}
+
+	/* attempted sanity for empty dirs */
+	if (items && !items_len) {
+		items_len = 1;
+		items = realloc(items, sizeof(item));
+		items[0] = (item){0};
+		strcpy(items[0].name, "empty");
+	}
+
 	qsort(items, items_len, sizeof(item), sort);
 	refresh_layout();
 }
