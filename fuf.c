@@ -51,6 +51,7 @@ char search[256];
 char goto_item[256];
 char open_path[PATH_MAX];
 char preview_path[PATH_MAX];
+char cwd_sane[PATH_MAX];
 pid_t fuf_pgid;
 
 #ifdef X_HACKS
@@ -476,6 +477,9 @@ refresh_layout()
 				cwd_len : COLS-strlen(index)-3, 0, 1);
 		smvwaddstr(cwd_w, 0, 0, cwd_len < COLS-strlen(index)-3 ?
 				cwd : cwd + (cwd_len-COLS+strlen(index)+3));
+		if (strcmp(cwd, cwd_sane)) {
+			strcpy(cwd_sane, cwd);
+		}
 	} else {
 		swattron(dir_w, COLOR_PAIR(COL(COLOR_RED, COLOR_DEFAULT)) | A_BOLD);
 		smvwaddstr(dir_w, 0, 0, "dir not found");
@@ -630,9 +634,10 @@ main(int argc, char *argv[])
 				break;
 			case 'h':
 			key_left:
-				getcwd(cwd, PATH_MAX);
-				strcpy(goto_item, basename(cwd));
-				chdir("..");
+				strcpy(goto_item, basename(cwd_sane));
+				if (chdir("..")) { /* obtain .. manually when stuck */
+					chdir(dirname(cwd_sane));
+				}
 				start_load(load_items, display_load);
 				break;
 			case 'l':
