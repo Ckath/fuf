@@ -672,6 +672,7 @@ main(int argc, char *argv[])
 				if (ch_prompt("goto: [g] top") == 'g') {
 					sel_item = 0;
 				}
+				cancel_preview();
 				refresh_layout();
 				break;
 			case 'G':
