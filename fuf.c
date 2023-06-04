@@ -840,6 +840,7 @@ main(int argc, char *argv[])
 				}
 				break;
 			case 't':
+				cancel_preview();
 				sendwin();
 				setenv("FUFSEL", items[sel_item].name, 1);
 				open_with(getenv("SHELL"), NULL, true);
