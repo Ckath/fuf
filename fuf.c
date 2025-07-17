@@ -27,12 +27,13 @@
 #include "inc/xhacks.h"
 #endif
 
-static void handle_redraw();  /* utility */
-static void handle_chld();
+static void handle_redraw(int i);  /* utility */
+static void handle_chld(int i);
 static void init();
 static char ch_prompt(char *prefix);
 static void str_prompt(char *prefix, char *result);
 static void search_next(bool reverse);
+static void non_dir();
 static void open_with(char *launcher, char *file, bool cli);
 static void reset_preview();
 static void display_load();   /* async */
@@ -85,13 +86,13 @@ xwinwatch()
 #endif
 
 static void
-handle_chld()
+handle_chld(int i)
 {
 	while (waitpid((pid_t)(-1), 0, WNOHANG) > 0); 
 }
 
 static void
-handle_redraw()
+handle_redraw(int i)
 {
 	sendwin();
 	srefresh();
@@ -150,7 +151,7 @@ init()
 
 	/* init fuf */
 	fuf_pgid = getpgid(getpid());
-	handle_redraw();
+	handle_redraw(0);
 	start_load(load_items, display_load);
 	init_preview(load_preview);
 #ifdef X_HACKS
@@ -266,6 +267,24 @@ search_next(bool reverse)
 }
 
 static void
+non_dir()
+{
+	unsigned dir_pos = 0;
+	int i = 0;
+	while (items[i].dir || i <= items_len) {
+		if (!items[i].dir) {
+			dir_pos = i;
+			break;
+		}
+		++i;
+	}
+
+	if (dir_pos != 0) {
+		sel_item = dir_pos;
+	}
+}
+
+static void
 open_with(char *launcher, char *file, bool cli)
 {
 	pid_t pid = fork();
@@ -284,7 +303,7 @@ open_with(char *launcher, char *file, bool cli)
 				sleep(1);
 			} if (!abandon_chld) {
 				reset_preview();
-				handle_redraw(); /* redraw since its probably fucked */
+				handle_redraw(0); /* redraw since its probably fucked */
 			}
 		}
 	}
@@ -666,7 +685,7 @@ main(int argc, char *argv[])
 				break;
 			case CTRL('l'):
 				reset_preview();
-				handle_redraw();
+				handle_redraw(0);
 				break;
 			case 'g':
 				if (ch_prompt("goto: [g] top") == 'g') {
@@ -844,6 +863,10 @@ main(int argc, char *argv[])
 				sendwin();
 				setenv("FUFSEL", items[sel_item].name, 1);
 				open_with(getenv("SHELL"), NULL, true);
+				break;
+			case ')':
+				non_dir();
+				refresh_layout();	
 				break;
 		}
 	}
