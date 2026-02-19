@@ -688,11 +688,19 @@ main(int argc, char *argv[])
 				handle_redraw(0);
 				break;
 			case 'g':
-				if (ch_prompt("goto: [g] top") == 'g') {
-					sel_item = 0;
+				switch(ch_prompt("goto: "
+							"[g] top, "
+							"[f] first file")) {
+					case 'g':
+						sel_item = 0;
+						cancel_preview();
+						refresh_layout();
+						break;
+					case 'f':
+						non_dir();
+						refresh_layout();
+						break;
 				}
-				cancel_preview();
-				refresh_layout();
 				break;
 			case 'G':
 				sel_item = items_len-1;
@@ -866,7 +874,7 @@ main(int argc, char *argv[])
 				break;
 			case ')':
 				non_dir();
-				refresh_layout();	
+				refresh_layout();
 				break;
 		}
 	}
