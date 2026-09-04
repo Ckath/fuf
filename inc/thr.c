@@ -66,8 +66,10 @@ cancel_preview()
 	pthread_mutex_lock(&preview_pid_lock);
 	if (preview_pid[0]) {
 		ext_kill(preview_pid[0], SIGKILL);
+		preview_pid[0] = 0;
 	} if (preview_pid[1]) {
 		ext_kill(preview_pid[1], SIGKILL);
+		preview_pid[1] = 0;
 	}
 	pthread_mutex_unlock(&preview_pid_lock);
 }

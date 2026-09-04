@@ -101,11 +101,9 @@ handle_redraw(int i)
 	scroll_pos = items_len-scroll_pos < LINES+2
 		? 0 : scroll_pos;
 
-	extern bool items_loading;
-	if (!items_loading) {
-		cancel_preview();
-		refresh_layout();
-	}
+	stop_load();
+	cancel_preview();
+	refresh_layout();
 }
 
 static void
@@ -390,7 +388,6 @@ load_items()
 static void
 load_preview()
 {
-	char file[256];
 	extern bool pn;
 	char nthr = pn++;
 	prctl(PR_SET_NAME, nthr ? "preview0" : "preview1");
@@ -406,8 +403,6 @@ load_preview()
 		} while(!items); /* edgecase, called before items are loaded */
 		pthread_mutex_unlock(&preview_lock);
 
-		strcpy(file, items[sel_item].name);
-		WINDOW *preview_w = snewwin(LINES-2, COLS/2-2, 1, COLS/2+1);
 
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -415,7 +410,7 @@ load_preview()
 		int col_px = w.ws_xpixel/COLS;
 		int line_px = w.ws_ypixel/LINES;
 		sprintf(preview_cmd, "%s \"%s\" %d %d %d %d %d %d 2>&1",
-				preview_path, ext_shesc(file), COLS/2-2, LINES-2,
+				preview_path, ext_shesc(items[sel_item].name), COLS/2-2, LINES-2,
 				col_px*(COLS/2-3), line_px*(LINES-2), /* preview img size */
 				col_px*(COLS/2+1), line_px);          /* preview img pos */
 
@@ -432,6 +427,7 @@ load_preview()
 		preview_pid[nthr] = ext_popen(preview_cmd, &fd);
 		pthread_mutex_unlock(&preview_pid_lock);
 
+		WINDOW *preview_w = snewwin(LINES-2, COLS/2-2, 1, COLS/2+1);
 		int l = 0;
 		char buf[COLS];
 		FILE *fp = fdopen(fd, "r");
